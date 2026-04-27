@@ -81,4 +81,4 @@ git push origin develop
 gh pr create --base develop --title "PR-XX: タイトル"
 ```
 
-PR 概要の書き方: [../pr-template.md](../pr-template.md)
+PR 概要の書き方: [pr-template.md](pr-template.md)
