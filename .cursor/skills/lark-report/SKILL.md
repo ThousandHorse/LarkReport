@@ -117,6 +117,8 @@ gh pr create --base develop --title "PR-XX: タイトル"
 # PR マージ後に次の PR へ（必ずマージ確認してから）
 ```
 
+**PR 概要の書き方**: [pr-template.md](pr-template.md) を参照
+
 ## PR 実装順序とフェーズ
 
 詳細仕様: [daily-report-plan.md](../../daily-report-plan.md)
