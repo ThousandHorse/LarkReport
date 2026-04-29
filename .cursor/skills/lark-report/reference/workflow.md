@@ -95,7 +95,7 @@ gh pr create --base develop --title "PR-XX: タイトル"
 > ⚠️ **禁止事項（厳守）**
 > - `git flow feature finish` → ローカルで develop にマージしてしまうので使わない
 > - `git push origin develop` → develop への直接 push は禁止
-> - `gh pr merge` → 自動マージは禁止。マージはユーザーが GitHub 上で手動で行う
+> - `gh pr merge` → CLI でのマージ操作は禁止。マージはユーザーが GitHub 上で手動で行う
 
 PR 概要の書き方: [pr-template.md](pr-template.md)
 

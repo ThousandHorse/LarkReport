@@ -50,7 +50,7 @@ GitHub Secrets: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKE
 Step 1: explore サブエージェントで PR 仕様確認
 Step 2: 実装（完了条件を全て満たす）
 Step 3: generalPurpose サブエージェントでコードレビュー
-Step 4: git push origin feature/PR-XX → gh pr create
+Step 4: git push origin feature/PR-XX-description → gh pr create
 Step 5: ユーザーのマージを待つ ← 次の PR はマージ確認後に開始
 ```
 
@@ -75,7 +75,7 @@ git checkout develop && git pull origin develop
 ⛔ 禁止事項:
 - `git push origin develop`（develop への直接 push）
 - `git flow feature finish`（ローカルで勝手にマージ）
-- `gh pr merge`（自動マージ）
+- `gh pr merge`（CLI でのマージ操作禁止）
 
 PR 概要の書き方: [reference/pr-template.md](reference/pr-template.md)
 
