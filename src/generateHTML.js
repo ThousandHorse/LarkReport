@@ -233,11 +233,15 @@ export function generateEveningHTML({ date, completed = [], incomplete = [], ove
       </div>
 
       <!-- AI コメント -->
+      <!-- TODO: タスクなし時の詳細ガイダンス（Google Tasks への追加手順など）を表示する -->
       <div class="bg-indigo-50 border-l-[6px] border-indigo-500 p-8 rounded-r-[2rem] flex gap-6 items-start shadow-sm text-indigo-900">
         <div class="bg-indigo-600 rounded-2xl p-3 text-white shadow-md flex-shrink-0">
           <span class="text-2xl">✨</span>
         </div>
-        <div class="text-xl font-medium leading-relaxed whitespace-pre-wrap">${escapeHtml(aiComment).trim()}</div>
+        ${aiComment.trim()
+          ? `<div class="text-xl font-medium leading-relaxed whitespace-pre-wrap">${escapeHtml(aiComment).trim()}</div>`
+          : `<p class="text-xl font-black text-indigo-500">今日のタスクを追加しましょう！</p>`
+        }
       </div>
 
       <!-- タスクリスト（2カラム） -->
