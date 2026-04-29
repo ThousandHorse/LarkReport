@@ -50,23 +50,32 @@ GitHub Secrets: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKE
 Step 1: explore サブエージェントで PR 仕様確認
 Step 2: 実装（完了条件を全て満たす）
 Step 3: generalPurpose サブエージェントでコードレビュー
-Step 4: git push origin feature/PR-XX → gh pr create（finish は使わない）
+Step 4: git push origin feature/PR-XX-description → gh pr create
 Step 5: ユーザーのマージを待つ ← 次の PR はマージ確認後に開始
 ```
 
 - **1PR ずつ進める**（複数 PR を一度に実装しない）
 - **PR マージはユーザーが手動**（`gh pr merge` は使わない）
+- **develop への直接 push 禁止**（必ず feature ブランチ経由）
 
 サブエージェントの詳細（Task() コード）: [reference/workflow.md](reference/workflow.md)
 
 ## Git Flow 運用
 
 ```bash
-git flow feature start PR-XX-description   # 実装開始
-git flow feature finish PR-XX-description  # develop にマージ
-git push origin develop
+git flow feature start PR-XX-description     # ブランチ作成・実装開始
+git push origin feature/PR-XX-description   # PR 作成前にリモートへ push
 gh pr create --base develop --title "PR-XX: タイトル"
+# → ユーザーがマージするまで待つ（finish・gh pr merge は使わない）
+
+# マージ確認後に develop を最新化
+git checkout develop && git pull origin develop
 ```
+
+⛔ 禁止事項:
+- `git push origin develop`（develop への直接 push）
+- `git flow feature finish`（ローカルで勝手にマージ）
+- `gh pr merge`（CLI でのマージ操作禁止）
 
 PR 概要の書き方: [reference/pr-template.md](reference/pr-template.md)
 
