@@ -2,7 +2,11 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const apiKey = process.env.GEMINI_API_KEY;
+if (!apiKey) {
+  throw new Error('環境変数 GEMINI_API_KEY が設定されていません');
+}
+const genAI = new GoogleGenerativeAI(apiKey);
 const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
 /**
@@ -20,8 +24,12 @@ export async function generateMorningComment(tasks) {
 
 ${taskList}`;
 
-  const result = await model.generateContent(prompt);
-  return result.response.text();
+  try {
+    const result = await model.generateContent(prompt);
+    return result.response.text();
+  } catch (err) {
+    throw new Error('朝コメントの生成に失敗しました: ' + err.message, { cause: err });
+  }
 }
 
 /**
@@ -41,12 +49,16 @@ export async function generateEveningComment(tasks, progressRate) {
 
 ${taskList}`;
 
-  const result = await model.generateContent(prompt);
-  return result.response.text();
+  try {
+    const result = await model.generateContent(prompt);
+    return result.response.text();
+  } catch (err) {
+    throw new Error('夜コメントの生成に失敗しました: ' + err.message, { cause: err });
+  }
 }
 
 // 単体実行テスト用（node src/summarize.js で動作確認）
-if (process.argv[1].endsWith('summarize.js')) {
+if (process.argv[1] && process.argv[1].endsWith('summarize.js')) {
   const testTasks = [
     { title: 'プロジェクト設計書のレビュー', completed: false },
     { title: 'API 接続テストの実装',         completed: true  },
