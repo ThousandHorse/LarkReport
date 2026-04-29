@@ -25,14 +25,17 @@ function createAuthClient() {
 }
 
 /**
- * 今日（JST）期限のタスクを取得し、完了・未完了に分けて返す
+ * 今日（JST）期限のタスクを取得し、完了・未完了に分けて返す。
+ * あわせて過去 90 日以内の期限切れ未完了タスク（overdue）も取得して返す。
  *
  * @returns {Promise<{
- *   completed: Array<{title: string, completed: boolean}>,
- *   incomplete: Array<{title: string, completed: boolean}>,
- *   total: number,
+ *   completed:     Array<{title: string, completed: boolean}>,
+ *   incomplete:    Array<{title: string, completed: boolean}>,
+ *   overdue:       Array<{title: string, completed: boolean, overdueDays: number}>,
+ *   total:         number,
  *   completedCount: number,
- *   progressRate: number
+ *   overdueCount:  number,
+ *   progressRate:  number
  * }>}
  */
 export async function fetchTodayTasks() {
@@ -61,29 +64,28 @@ export async function fetchTodayTasks() {
     const y = nowJST.getUTCFullYear();
     const m = nowJST.getUTCMonth();
     const d = nowJST.getUTCDate();
-    const startOfDay = new Date(Date.UTC(y, m, d, 0, 0, 0, 0)).toISOString();     // JST 今日の UTC midnight
-    const endOfDay = new Date(Date.UTC(y, m, d + 1, 0, 0, 0, 0)).toISOString();   // 翌日の UTC midnight（exclusive）
+    const startOfDay  = new Date(Date.UTC(y, m, d,     0, 0, 0, 0)).toISOString(); // JST 今日の UTC midnight
+    const endOfDay    = new Date(Date.UTC(y, m, d + 1, 0, 0, 0, 0)).toISOString(); // 翌日の UTC midnight（exclusive）
+    const ninetyDaysAgo = new Date(Date.UTC(y, m, d - 90, 0, 0, 0, 0)).toISOString(); // 90 日前
 
-    // nextPageToken を使って全ページのタスクを取得する
-    const allTasks = [];
-    let pageToken;
-    do {
-      const tasksRes = await tasksApi.tasks.list({
-        tasklist: listId,
-        dueMin: startOfDay,
-        dueMax: endOfDay,
-        showCompleted: true,
-        showHidden: true,
-        maxResults: 100,
-        ...(pageToken && { pageToken }),
-      });
-      const pageItems = tasksRes.data.items || [];
-      allTasks.push(...pageItems);
-      pageToken = tasksRes.data.nextPageToken;
-    } while (pageToken);
+    // ① 今日のタスクを取得（完了・未完了両方）
+    const todayTasks = await fetchAllPages(tasksApi, listId, {
+      dueMin: startOfDay,
+      dueMax: endOfDay,
+      showCompleted: true,
+      showHidden: true,
+    });
 
-    // 1回のループで completed / incomplete に分類する
-    const { completed, incomplete } = allTasks.reduce(
+    // ② 期限切れ未完了タスクを取得（過去 90 日以内、incomplete のみ）
+    const overdueTasks = await fetchAllPages(tasksApi, listId, {
+      dueMin: ninetyDaysAgo,
+      dueMax: startOfDay,   // 今日より前（exclusive）
+      showCompleted: false,
+      showHidden: true,
+    });
+
+    // 今日のタスクを completed / incomplete に分類する
+    const { completed, incomplete } = todayTasks.reduce(
       (acc, t) => {
         const isCompleted = t.status === 'completed';
         acc[isCompleted ? 'completed' : 'incomplete'].push({
@@ -95,14 +97,47 @@ export async function fetchTodayTasks() {
       { completed: [], incomplete: [] }
     );
 
-    const total = allTasks.length;
+    // 期限切れタスクに overdueDays を付与する
+    const todayUTC = new Date(Date.UTC(y, m, d));
+    const overdue = overdueTasks.map(t => {
+      const dueDate = new Date(t.due);
+      const overdueDays = Math.floor((todayUTC - dueDate) / (1000 * 60 * 60 * 24));
+      return { title: t.title, completed: false, overdueDays };
+    });
+
+    const total = todayTasks.length;
     const completedCount = completed.length;
+    const overdueCount = overdue.length;
     const progressRate = total > 0 ? Math.round((completedCount / total) * 100) : 0;
 
-    return { completed, incomplete, total, completedCount, progressRate };
+    return { completed, incomplete, overdue, total, completedCount, overdueCount, progressRate };
   } catch (err) {
     throw new Error(`Google Tasks の取得に失敗しました: ${err.message}`, { cause: err });
   }
+}
+
+/**
+ * nextPageToken を使ってタスクを全ページ取得するヘルパー
+ *
+ * @param {object} tasksApi - google.tasks インスタンス
+ * @param {string} listId   - タスクリスト ID
+ * @param {object} params   - tasks.list に渡すパラメータ
+ * @returns {Promise<Array>}
+ */
+async function fetchAllPages(tasksApi, listId, params) {
+  const allTasks = [];
+  let pageToken;
+  do {
+    const res = await tasksApi.tasks.list({
+      tasklist: listId,
+      maxResults: 100,
+      ...params,
+      ...(pageToken && { pageToken }),
+    });
+    allTasks.push(...(res.data.items || []));
+    pageToken = res.data.nextPageToken;
+  } while (pageToken);
+  return allTasks;
 }
 
 if (process.argv[1] && process.argv[1].endsWith('fetchTasks.js')) {
