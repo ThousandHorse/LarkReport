@@ -57,11 +57,13 @@ export async function generateMorningComment(tasks = []) {
   const prompt = `以下は今日のタスク一覧です。
 励みになる朝のコメントを日本語で2〜3文で生成してください。
 タスクの優先順位や進め方のアドバイスも含めてください。
-各文の間には改行（\\n）を入れてください。
+各文の間には改行を入れてください。
 
 ${taskList}`;
 
-  return generateWithFallback(prompt, '朝コメント');
+  const text = await generateWithFallback(prompt, '朝コメント');
+  // モデルが改行を \\n リテラルで返した場合に実際の改行へ変換
+  return text.replace(/\\n/g, '\n');
 }
 
 /**
@@ -78,10 +80,12 @@ export async function generateEveningComment(tasks = [], progressRate = 0) {
 
   const prompt = `今日の作業結果です。進捗率は ${progressRate}% です。
 振り返りと明日への前向きなアドバイスを日本語で2〜3文で生成してください。
+各文の間には改行を入れてください。
 
 ${taskList}`;
 
-  return generateWithFallback(prompt, '夜コメント');
+  const text = await generateWithFallback(prompt, '夜コメント');
+  return text.replace(/\\n/g, '\n');
 }
 
 // 単体実行テスト用（node src/summarize.js で動作確認）
