@@ -13,7 +13,7 @@ description: >-
 ```
 Google Tasks API
   ↓ fetchTodayTasks()          → { completed, incomplete, total, completedCount, progressRate }
-Gemini API（gemini-2.0-flash・無料枠）
+Gemini API（gemini-2.5-flash 優先・503 時は gemini-2.5-flash-lite → gemini-flash-latest にフォールバック）
   ↓ generateMorningComment()   → aiComment（朝）
   ↓ generateEveningComment()   → aiComment（夜）
 generateMorningHTML() / generateEveningHTML()   ← Tailwind CSS CDN
