@@ -10,7 +10,7 @@ Google Tasks のタスクを毎日自動取得し、Tailwind CSS で美しいビ
 | データ取得元 | Google Tasks API |
 | レポート生成 | Node.js + Tailwind CSS → Playwright で PNG 変換 |
 | AI 要約 | Google Gemini API（gemini-2.0-flash） |
-| 配信先 | Slack Incoming Webhook |
+| 配信先 | Slack Files Upload API（Bot Token） |
 
 ---
 
