@@ -1,0 +1,36 @@
+name: 夜のデイリーレポート
+
+on:
+  schedule:
+    - cron: '0 14 * * *'  # 毎日 UTC 14:00 = JST 23:00
+  workflow_dispatch:       # 手動実行（テスト用）
+
+jobs:
+  send-evening-report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Node.js セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 依存パッケージをインストール
+        run: npm ci
+
+      - name: Playwright (Chromium) をインストール
+        run: npx playwright install --with-deps chromium
+
+      - name: 夜レポートを実行して Slack に送信
+        run: npm run evening
+        env:
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
