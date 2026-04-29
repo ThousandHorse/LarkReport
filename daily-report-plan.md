@@ -6,7 +6,7 @@ Google Tasks のタスクを毎日自動取得し、Tailwind CSS で美しいビ
 
 | 項目 | 内容 |
 |------|------|
-| トリガー | GitHub Actions（朝 7:00 / 夜 22:00） |
+| トリガー | GitHub Actions（朝 7:00 / 夜 23:00） |
 | データ取得元 | Google Tasks API |
 | レポート生成 | Node.js + Tailwind CSS → Playwright で PNG 変換 |
 | AI 要約 | Google Gemini API（gemini-2.0-flash） |
@@ -21,7 +21,7 @@ LarkReport/
 ├── .github/
 │   └── workflows/
 │       ├── morning-report.yml     # 朝 7:00 トリガー
-│       └── evening-report.yml     # 夜 22:00 トリガー
+│       └── evening-report.yml     # 夜 23:00 トリガー
 ├── src/
 │   ├── fetchTasks.js              # Google Tasks からタスク取得
 │   ├── generateHTML.js            # Tailwind HTML レポート生成
@@ -1195,7 +1195,7 @@ jobs:
 ## ⚙️ PR-14：GitHub Actions 夜ワークフロー
 
 ### やること
-- 夜 22:00（JST）= UTC 13:00 に自動実行されるワークフローを定義する
+- 夜 23:00（JST）= UTC 14:00 に自動実行されるワークフローを定義する
 
 ### 作成するファイル
 
@@ -1203,10 +1203,10 @@ jobs:
 ```yaml
 name: 夜のデイリーレポート
 
-# 毎日 UTC 13:00 = JST 22:00 に実行
+# 毎日 UTC 14:00 = JST 23:00 に実行
 on:
   schedule:
-    - cron: '0 13 * * *'
+    - cron: '0 14 * * *'
   workflow_dispatch:
 
 jobs:
