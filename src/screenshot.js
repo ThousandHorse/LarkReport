@@ -116,14 +116,7 @@ if (process.argv[1] && process.argv[1].endsWith('screenshot.js')) {
       { label: '夜 10行', file: 'test-output/evening-10lines.png', html: generateEveningHTML({ ...eveningBase, aiComment: eveningComments[2] }) },
     ];
 
-    // 基本動作確認用の簡易テスト
-    const basicHtml = `<!DOCTYPE html><html><head><script src="https://cdn.tailwindcss.com"></script></head>
-      <body class="p-8 bg-blue-50"><h1 class="text-2xl font-bold text-blue-800">スクショテスト</h1></body></html>`;
-    const basicBuf = await htmlToPng(basicHtml);
-    writeFileSync('test-output/screenshot.png', basicBuf);
-    console.log(`✅ test-output/screenshot.png → 高さ: ${pngHeight(basicBuf)}px`);
-
-    console.log('\n--- 動的高さ確認テスト ---');
+    console.log('--- 動的高さ確認テスト ---');
     for (const c of cases) {
       const buf = await htmlToPng(c.html);
       writeFileSync(c.file, buf);
