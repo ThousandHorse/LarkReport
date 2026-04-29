@@ -8,25 +8,26 @@ import { chromium } from '@playwright/test';
  */
 export async function htmlToPng(html) {
   const browser = await chromium.launch();
-  const page = await browser.newPage();
+  try {
+    const page = await browser.newPage();
 
-  // ビューポートを 800px × 1200px に設定（レポートの固定幅に合わせる）
-  await page.setViewportSize({ width: 800, height: 1200 });
+    // ビューポートを 800px × 1200px に設定（レポートの固定幅に合わせる）
+    await page.setViewportSize({ width: 800, height: 1200 });
 
-  // HTML 文字列を直接ページにセットする
-  // waitUntil: 'networkidle' = Tailwind CDN など全リソースの読み込み完了まで待つ
-  await page.setContent(html, { waitUntil: 'networkidle' });
+    // HTML 文字列を直接ページにセットする
+    // waitUntil: 'networkidle' = Tailwind CDN など全リソースの読み込み完了まで待つ
+    await page.setContent(html, { waitUntil: 'networkidle' });
 
-  // ページ全体のスクリーンショットを PNG で撮影する
-  // fullPage: true = スクロールが必要な部分も全てキャプチャ
-  const screenshot = await page.screenshot({
-    type: 'png',
-    fullPage: true,
-  });
-
-  await browser.close();
-
-  return screenshot;
+    // ページ全体のスクリーンショットを PNG で撮影する
+    // fullPage: true = スクロールが必要な部分も全てキャプチャ
+    // return await でスクリーンショット完了を finally の前に保証する
+    return await page.screenshot({
+      type: 'png',
+      fullPage: true,
+    });
+  } finally {
+    await browser.close();
+  }
 }
 
 // 単体実行テスト用（node src/screenshot.js で動作確認）
