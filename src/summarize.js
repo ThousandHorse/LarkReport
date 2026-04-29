@@ -62,8 +62,8 @@ export async function generateMorningComment(tasks = []) {
 ${taskList}`;
 
   const text = await generateWithFallback(prompt, '朝コメント');
-  // モデルが改行を \\n リテラルで返した場合に実際の改行へ変換
-  return text.replace(/\\n/g, '\n');
+  // モデルが改行を \\n リテラルで返した場合に実際の改行へ変換し、連続改行を1つに圧縮
+  return text.replace(/\\n/g, '\n').replace(/\n{2,}/g, '\n').trim();
 }
 
 /**
@@ -85,7 +85,7 @@ export async function generateEveningComment(tasks = [], progressRate = 0) {
 ${taskList}`;
 
   const text = await generateWithFallback(prompt, '夜コメント');
-  return text.replace(/\\n/g, '\n');
+  return text.replace(/\\n/g, '\n').replace(/\n{2,}/g, '\n').trim();
 }
 
 // 単体実行テスト用（node src/summarize.js で動作確認）
