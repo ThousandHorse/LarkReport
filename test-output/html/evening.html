@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    body { width: 800px; margin: 0; font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif; background-color: #0f172a; }
+    .status-card { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+  </style>
+</head>
+<body class="p-8">
+  <div class="bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-slate-800">
+
+    <!-- ヘッダー -->
+    <div class="bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 p-10 text-white">
+      <div class="flex justify-between items-start mb-8">
+        <div class="flex items-center gap-4">
+          <h1 class="text-4xl font-black">2026年4月29日（水）</h1>
+          <span class="text-4xl text-indigo-300">🌙</span>
+        </div>
+        <div class="text-right">
+          <div class="text-6xl font-black text-indigo-400 leading-none">33<span class="text-2xl ml-1">%</span></div>
+        </div>
+      </div>
+      <!-- 進捗バー -->
+      <div class="w-full bg-slate-800/50 rounded-full h-4 overflow-hidden p-0.5 border border-white/10">
+        <div class="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 h-full rounded-full" style="width: 33%"></div>
+      </div>
+    </div>
+
+    <div class="p-10 space-y-10">
+
+      <!-- ステータスカード（3カラム） -->
+      <div class="grid grid-cols-3 gap-4">
+        <div class="status-card bg-[#f0fdf4] border border-[#bbf7d0] rounded-[1.5rem] py-4 px-6 flex items-center justify-center gap-4">
+          <span class="text-3xl">✅</span>
+          <span class="text-[#15803d] text-4xl font-black tabular-nums">1</span>
+        </div>
+        <div class="status-card bg-[#fffbeb] border border-[#fef3c7] rounded-[1.5rem] py-4 px-6 flex items-center justify-center gap-4">
+          <span class="text-3xl">⚠️</span>
+          <span class="text-[#b45309] text-4xl font-black tabular-nums">1</span>
+        </div>
+        <div class="status-card bg-[#fef2f2] border border-[#fee2e2] rounded-[1.5rem] py-4 px-6 flex items-center justify-center gap-4">
+          <span class="text-3xl">🚨</span>
+          <span class="text-[#b91c1c] text-4xl font-black tabular-nums">1</span>
+        </div>
+      </div>
+
+      <!-- AI コメント -->
+      <div class="bg-indigo-50 border-l-[6px] border-indigo-500 p-8 rounded-r-[2rem] flex gap-6 items-start shadow-sm text-indigo-900">
+        <div class="bg-indigo-600 rounded-2xl p-3 text-white shadow-md flex-shrink-0">
+          <span class="text-2xl">✨</span>
+        </div>
+        <div class="text-xl font-medium leading-relaxed whitespace-pre-wrap">今日もお疲れ様でした！
+API 接続テストを完了させた実行力、素晴らしいです。
+期限切れになっている設計書のレビューを明日の午前中に最優先で対処しましょう。</div>
+      </div>
+
+      <!-- タスクリスト（2カラム） -->
+      <div class="grid grid-cols-2 gap-8">
+
+        <!-- Done -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2 border-b border-emerald-100 pb-3">
+            <span class="text-lg">✅</span>
+            <span class="font-black text-sm uppercase tracking-widest text-emerald-600 opacity-80">Done</span>
+            <span class="ml-auto text-sm font-bold text-emerald-600">1件</span>
+          </div>
+          <div class="space-y-3">
+            
+        <div class="p-4 bg-emerald-50 border border-emerald-100 rounded-[2rem] text-slate-500 font-bold text-lg line-through">
+          API 接続テストの実装
+        </div>
+          </div>
+        </div>
+
+        <!-- Next -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2 border-b border-indigo-100 pb-3">
+            <span class="text-lg">📅</span>
+            <span class="font-black text-sm uppercase tracking-widest text-indigo-600 opacity-80">Next</span>
+            <span class="ml-auto text-sm font-bold text-indigo-600">2件</span>
+          </div>
+          <div class="space-y-3">
+            
+        <div class="flex items-center justify-between p-5 bg-rose-50 border-2 border-rose-100 rounded-[2rem]">
+          <p class="text-lg text-rose-900 font-bold">プロジェクト設計書のレビュー</p>
+          <span class="bg-rose-600 text-white text-[10px] font-black px-2 py-1 rounded-lg flex-shrink-0 ml-3">⏱ 2日遅延</span>
+        </div>
+        <div class="flex items-center p-5 bg-indigo-50/50 border-2 border-indigo-100 rounded-[2rem]">
+          <p class="text-lg text-slate-700 font-bold">Slack 通知の動作確認</p>
+        </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- フッター -->
+    <div class="bg-slate-900 py-8 text-center flex flex-col items-center gap-1">
+      <span class="text-xl text-indigo-400">🌙</span>
+      <span class="text-[10px] font-bold text-slate-500 tracking-[0.3em] uppercase">Built for Takuma Chiba</span>
+    </div>
+
+  </div>
+</body>
+</html>

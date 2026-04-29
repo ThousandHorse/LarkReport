@@ -280,7 +280,8 @@ export function generateEveningHTML({ date, completed = [], incomplete = [], ove
 
 // 単体実行テスト用（node src/generateHTML.js で動作確認）
 if (process.argv[1] && process.argv[1].endsWith('generateHTML.js')) {
-  import('fs').then(({ writeFileSync }) => {
+  import('fs').then(({ writeFileSync, mkdirSync }) => {
+    mkdirSync('test-output/html', { recursive: true });
     const morningHtml = generateMorningHTML({
       date: '2026年4月29日（水）',
       tasks: [
@@ -294,8 +295,8 @@ if (process.argv[1] && process.argv[1].endsWith('generateHTML.js')) {
       overdueCount: 1,
       aiComment: 'おはようございます！今日も充実した一日にしましょう。\nまずは期限切れになっている設計書のレビューから取り掛かり、全体像を把握してから実装に進むとスムーズです。',
     });
-    writeFileSync('test-morning.html', morningHtml);
-    console.log('✅ test-morning.html を生成しました');
+    writeFileSync('test-output/html/morning.html', morningHtml);
+    console.log('✅ test-output/html/morning.html を生成しました');
 
     const eveningHtml = generateEveningHTML({
       date: '2026年4月29日（水）',
@@ -311,7 +312,7 @@ if (process.argv[1] && process.argv[1].endsWith('generateHTML.js')) {
       progressRate: 33,
       aiComment: '今日もお疲れ様でした！\nAPI 接続テストを完了させた実行力、素晴らしいです。\n期限切れになっている設計書のレビューを明日の午前中に最優先で対処しましょう。',
     });
-    writeFileSync('test-evening.html', eveningHtml);
-    console.log('✅ test-evening.html を生成しました');
+    writeFileSync('test-output/html/evening.html', eveningHtml);
+    console.log('✅ test-output/html/evening.html を生成しました');
   }).catch(console.error);
 }

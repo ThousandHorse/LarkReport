@@ -52,7 +52,7 @@ if (process.argv[1] && process.argv[1].endsWith('screenshot.js')) {
     const { writeFileSync, mkdirSync } = await import('fs');
     const { generateMorningHTML, generateEveningHTML } = await import('./generateHTML.js');
 
-    mkdirSync('test-output', { recursive: true });
+    mkdirSync('test-output/png', { recursive: true });
 
     const morningBase = {
       date: '2026年4月29日（水）',
@@ -117,12 +117,12 @@ if (process.argv[1] && process.argv[1].endsWith('screenshot.js')) {
     ];
 
     const cases = [
-      { label: '朝 2行',  file: 'test-output/morning-2lines.png',  html: generateMorningHTML({ ...morningBase, aiComment: morningComments[0] }) },
-      { label: '朝 5行',  file: 'test-output/morning-5lines.png',  html: generateMorningHTML({ ...morningBase, aiComment: morningComments[1] }) },
-      { label: '朝 10行', file: 'test-output/morning-10lines.png', html: generateMorningHTML({ ...morningBase, aiComment: morningComments[2] }) },
-      { label: '夜 2行',  file: 'test-output/evening-2lines.png',  html: generateEveningHTML({ ...eveningBase, aiComment: eveningComments[0] }) },
-      { label: '夜 5行',  file: 'test-output/evening-5lines.png',  html: generateEveningHTML({ ...eveningBase, aiComment: eveningComments[1] }) },
-      { label: '夜 10行', file: 'test-output/evening-10lines.png', html: generateEveningHTML({ ...eveningBase, aiComment: eveningComments[2] }) },
+      { label: '朝 2行',  file: 'test-output/png/morning-2lines.png',  html: generateMorningHTML({ ...morningBase, aiComment: morningComments[0] }) },
+      { label: '朝 5行',  file: 'test-output/png/morning-5lines.png',  html: generateMorningHTML({ ...morningBase, aiComment: morningComments[1] }) },
+      { label: '朝 10行', file: 'test-output/png/morning-10lines.png', html: generateMorningHTML({ ...morningBase, aiComment: morningComments[2] }) },
+      { label: '夜 2行',  file: 'test-output/png/evening-2lines.png',  html: generateEveningHTML({ ...eveningBase, aiComment: eveningComments[0] }) },
+      { label: '夜 5行',  file: 'test-output/png/evening-5lines.png',  html: generateEveningHTML({ ...eveningBase, aiComment: eveningComments[1] }) },
+      { label: '夜 10行', file: 'test-output/png/evening-10lines.png', html: generateEveningHTML({ ...eveningBase, aiComment: eveningComments[2] }) },
     ];
 
     console.log('--- 動的高さ確認テスト ---');
