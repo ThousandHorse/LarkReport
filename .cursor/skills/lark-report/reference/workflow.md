@@ -88,9 +88,11 @@ Task({
 # feature ブランチをリモートにプッシュ
 git push origin feature/PR-XX-description
 
-# PR を作成する
+# PR を作成する（必ず --base develop を指定すること）
 gh pr create --base develop --title "PR-XX: タイトル"
 ```
+
+> ⚠️ `--base develop` を**必ず**付けること。省略するとデフォルトブランチ（main）がベースになる。
 
 > ⚠️ **禁止事項（厳守）**
 > - `git flow feature finish` → ローカルで develop にマージしてしまうので使わない
@@ -99,9 +101,85 @@ gh pr create --base develop --title "PR-XX: タイトル"
 
 PR 概要の書き方: [pr-template.md](pr-template.md)
 
-## Step 5: ユーザーのマージ待ち
+## Step 5: レビュー指摘対応
 
-PR 作成後は **ユーザーがマージするまで次の PR に進まない**。
+PR に bot（gemini-code-assist / chatgpt-codex など）や reviewer からレビュー指摘が来た場合、以下の手順で対応する。
+
+### 5-1. 指摘内容の確認
+
+```bash
+# インラインコメント一覧を取得
+gh api repos/ThousandHorse/LarkReport/pulls/{PR番号}/comments \
+  --jq '.[] | {id: .id, author: .user.login, path: .path, body: .body}'
+```
+
+### 5-2. 修正・コミット・プッシュ
+
+指摘に対してコードまたはドキュメントを修正し、feature ブランチにコミット＆プッシュする。
+
+### 5-3. 対応済みスレッドにリプライ
+
+`-f body=` では改行が反映されないため、`--input` でヒアドキュメントを JSON として渡す。
+
+```bash
+# 対応内容をリプライとして残す（comment_id は 5-1 で取得した id）
+gh api repos/ThousandHorse/LarkReport/pulls/{PR番号}/comments/{comment_id}/replies \
+  -X POST --input - << 'EOF'
+{
+  "body": "対応済みです。\n\n〇〇を修正しました（commit: xxxxxxx）。"
+}
+EOF
+```
+
+リプライの推奨フォーマット：
+
+```
+対応済みです。
+
+- 修正内容: 〇〇を〇〇に変更
+- 対応 commit: xxxxxxx
+```
+
+### 5-4. スレッドを Resolve
+
+```bash
+# GraphQL でスレッドを Resolved に変更（thread_id は GraphQL で取得）
+gh api graphql -f query='
+mutation {
+  resolveReviewThread(input: {threadId: "PRRT_xxx"}) {
+    thread { isResolved }
+  }
+}'
+```
+
+スレッド ID の取得：
+
+```bash
+gh api graphql -f query='
+{
+  repository(owner: "ThousandHorse", name: "LarkReport") {
+    pullRequest(number: {PR番号}) {
+      reviewThreads(first: 20) {
+        nodes {
+          id
+          isResolved
+          comments(first: 1) {
+            nodes { author { login } path body }
+          }
+        }
+      }
+    }
+  }
+}' --jq '.data.repository.pullRequest.reviewThreads.nodes[] | {id, resolved: .isResolved, path: .comments.nodes[0].path}'
+```
+
+> **対応不要と判断した指摘**も、その理由をリプライに記載してから Resolve する。
+
+---
+
+## Step 7: ユーザーのマージ待ち
+
+レビュー指摘の対応・Resolve が完了したら、**ユーザーがマージするまで次の PR に進まない**。
 
 ユーザーから「マージした」「次進めて」などの指示を受けてから：
 
