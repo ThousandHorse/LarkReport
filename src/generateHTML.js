@@ -29,13 +29,13 @@ export function generateMorningHTML({ date, tasks, aiComment }) {
     ? tasks
         .map(
           t => `
-        <li class="flex items-center gap-4 p-4 bg-white border border-blue-100 rounded-2xl shadow-sm">
-          <span class="w-6 h-6 rounded-full border-2 border-blue-400 flex-shrink-0"></span>
-          <span class="text-slate-700 text-base font-medium">${escapeHtml(t.title)}</span>
-        </li>`
+        <div class="flex items-center p-6 bg-white border-2 border-blue-100 rounded-[2.5rem] shadow-sm">
+          <div class="w-8 h-8 rounded-xl border-2 border-blue-200 mr-5 flex-shrink-0"></div>
+          <p class="text-2xl text-slate-700 font-bold">${escapeHtml(t.title)}</p>
+        </div>`
         )
         .join('')
-    : `<li class="p-4 text-slate-400 text-sm text-center">今日のタスクはありません</li>`;
+    : `<div class="p-6 text-slate-400 text-center rounded-[2.5rem] border-2 border-slate-100">今日のタスクはありません</div>`;
 
   return `<!DOCTYPE html>
 <html lang="ja">
@@ -44,52 +44,59 @@ export function generateMorningHTML({ date, tasks, aiComment }) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { width: 800px; margin: 0; font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif; }
+    body { width: 800px; margin: 0; font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif; background-color: #f8fafc; }
+    .status-card { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
   </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
-  <div class="bg-white rounded-3xl shadow-xl overflow-hidden border border-blue-100">
+<body class="p-8">
+  <div class="bg-white rounded-[3rem] shadow-xl overflow-hidden border border-blue-100">
 
     <!-- ヘッダー -->
-    <div class="bg-gradient-to-r from-blue-500 to-indigo-600 px-10 py-8">
-      <div class="flex items-center gap-4">
-        <span class="text-5xl">🌅</span>
-        <div>
-          <h1 class="text-white text-3xl font-black">朝のレポート</h1>
-          <p class="text-blue-100 text-base mt-1">${escapeHtml(date)}</p>
-        </div>
+    <div class="bg-gradient-to-r from-blue-600 to-cyan-500 p-10 text-white">
+      <div class="flex items-center justify-between">
+        <h1 class="text-4xl font-black">${escapeHtml(date)}</h1>
+        <span class="text-4xl text-yellow-300">☀️</span>
       </div>
     </div>
 
     <div class="p-10">
 
+      <!-- ステータスカード -->
+      <div class="flex justify-center mb-10">
+        <div class="status-card bg-[#eff6ff] border border-[#bfdbfe] rounded-[1.5rem] py-4 px-10 flex items-center gap-4">
+          <span class="text-3xl">📋</span>
+          <span class="text-blue-700 text-4xl font-black tabular-nums">${taskCount}</span>
+          <span class="text-blue-600 text-lg font-bold">件のタスク</span>
+        </div>
+      </div>
+
       <!-- AI コメント -->
-      <div class="bg-blue-50 border-l-4 border-blue-500 rounded-r-2xl p-6 mb-8 flex gap-4 items-start shadow-sm">
-        <div class="bg-blue-500 rounded-xl p-2 text-white flex-shrink-0">
+      <div class="bg-blue-50 border-l-[6px] border-blue-500 p-8 rounded-r-[2rem] mb-12 flex gap-6 items-start shadow-sm text-blue-900">
+        <div class="bg-blue-500 rounded-2xl p-3 text-white shadow-md flex-shrink-0">
           <span class="text-2xl">🤖</span>
         </div>
-        <div>
-          <p class="text-sm font-bold text-blue-600 mb-1">AI からのひとこと</p>
-          <p class="text-slate-700 text-sm leading-relaxed">${escapeHtml(aiComment)}</p>
+        <div class="text-xl font-medium leading-relaxed">
+          ${escapeHtml(aiComment)}
         </div>
       </div>
 
       <!-- タスク一覧 -->
       <div>
-        <h2 class="text-lg font-black text-slate-800 mb-4 flex items-center gap-2">
-          <span>📋</span> 今日のタスク
-          <span class="ml-2 bg-blue-100 text-blue-700 text-sm font-bold px-3 py-1 rounded-full">${taskCount}件</span>
-        </h2>
-        <ul class="space-y-3">
+        <div class="flex items-center gap-3 mb-6 px-2">
+          <span class="text-2xl">📝</span>
+          <h2 class="text-2xl font-black text-slate-800">今日のタスク</h2>
+        </div>
+        <div class="space-y-4">
           ${taskItems}
-        </ul>
+        </div>
       </div>
 
     </div>
 
     <!-- フッター -->
-    <div class="bg-slate-50 py-5 text-center border-t border-slate-100">
-      <span class="text-xs font-bold text-slate-400 tracking-widest uppercase">LarkReport</span>
+    <div class="bg-slate-50 py-8 text-center flex flex-col items-center gap-1 border-t border-slate-100">
+      <span class="text-xl text-slate-300">🛡️</span>
+      <span class="text-[10px] font-bold text-slate-400 tracking-[0.3em] uppercase">Built for Takuma Chiba</span>
     </div>
 
   </div>
