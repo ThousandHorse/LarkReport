@@ -54,13 +54,15 @@ export async function fetchTodayTasks() {
       : items[0];
     const listId = targetList.id;
 
-    // JST で今日の 0:00〜23:59:59.999 を UTC に変換して API に渡す
+    // Google Tasks は due を常に UTC midnight（T00:00:00.000Z）で保存する。
+    // dueMin/dueMax は UTC date で比較されるため、JST の今日に相当する UTC 日付範囲を使う。
+    // dueMax は exclusive なので翌日の UTC midnight を指定する。
     const nowJST = new Date(Date.now() + JST_OFFSET_MS);
     const y = nowJST.getUTCFullYear();
     const m = nowJST.getUTCMonth();
     const d = nowJST.getUTCDate();
-    const startOfDay = new Date(Date.UTC(y, m, d, 0, 0, 0, 0) - JST_OFFSET_MS).toISOString();
-    const endOfDay = new Date(Date.UTC(y, m, d, 23, 59, 59, 999) - JST_OFFSET_MS).toISOString();
+    const startOfDay = new Date(Date.UTC(y, m, d, 0, 0, 0, 0)).toISOString();     // JST 今日の UTC midnight
+    const endOfDay = new Date(Date.UTC(y, m, d + 1, 0, 0, 0, 0)).toISOString();   // 翌日の UTC midnight（exclusive）
 
     // nextPageToken を使って全ページのタスクを取得する
     const allTasks = [];
