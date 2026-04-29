@@ -10,8 +10,10 @@ node src/[module].js（単体確認）
   ↓ エラーなし
 既存モジュール全て正常動作を確認
   ↓
-git flow feature finish → push → PR 作成
+git push origin feature/PR-XX-description → gh pr create --base develop
 ```
+
+> ⚠️ `git flow feature finish` は禁止（ローカルで develop にマージしてしまう）
 
 ## よくあるエラーと対処
 

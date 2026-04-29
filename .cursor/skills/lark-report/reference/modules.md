@@ -30,17 +30,27 @@ const screenshot = await page.screenshot({ type: 'png', fullPage: true });
 
 ```javascript
 import { GoogleGenerativeAI } from '@google/generative-ai';
-// gemini-2.0-flash は無料枠で利用可能
+// 503（高負荷）時のフォールバック順: gemini-2.5-flash → gemini-2.5-flash-lite → gemini-flash-latest
+const FALLBACK_MODELS = ['gemini-2.5-flash', 'gemini-2.5-flash-lite', 'gemini-flash-latest'];
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
-// テキスト生成
-const result = await model.generateContent(prompt);
-return result.response.text();
+// フォールバック付きテキスト生成（503 のときだけ次のモデルを試す）
+for (let i = 0; i < FALLBACK_MODELS.length; i++) {
+  try {
+    const model = genAI.getGenerativeModel({ model: FALLBACK_MODELS[i] });
+    const result = await model.generateContent(prompt);
+    return result.response.text();
+  } catch (err) {
+    const is503 = err.status === 503 || err.message?.includes('503');
+    if (is503 && i < FALLBACK_MODELS.length - 1) continue;
+    throw new Error(`${label}の生成に失敗しました: ${err.message}`, { cause: err });
+  }
+}
 ```
 
 - API キーは Google AI Studio（https://aistudio.google.com/app/apikey）で取得
 - `GEMINI_API_KEY` 環境変数で管理（`AIza` で始まる）
+- `gemini-2.0-flash` はプロジェクトによって無料枠クォータが 0 の場合あり → `gemini-2.5-flash` を使用
 
 ## sendSlack.js（3ステップ必須）
 
@@ -85,10 +95,12 @@ bg-gradient-to-br from-indigo-900 to-purple-900 /* 背景 */
 ## 単体実行ブロック（全モジュール共通）
 
 ```javascript
-if (process.argv[1].endsWith('xxx.js')) {
+if (process.argv[1] && process.argv[1].endsWith('xxx.js')) {
   // テストデータで関数を呼び出してコンソール出力
   yourFunction(testData).then(result => {
     console.log('結果:', JSON.stringify(result, null, 2));
   }).catch(console.error);
 }
 ```
+
+- `process.argv[1] &&` の存在チェックを必ず付ける（undefined 時の TypeError を防ぐ）
