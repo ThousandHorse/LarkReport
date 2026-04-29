@@ -87,7 +87,7 @@ export function generateMorningHTML({ date, tasks, overdueTasks = [], completedC
           <span class="text-[#15803d] text-4xl font-black tabular-nums">${completedCount}</span>
         </div>
         <div class="status-card bg-[#fffbeb] border border-[#fef3c7] rounded-[1.5rem] py-4 px-6 flex items-center justify-center gap-4">
-          <span class="text-3xl">⏳</span>
+          <span class="text-3xl">⚠️</span>
           <span class="text-[#b45309] text-4xl font-black tabular-nums">${incompleteCount}</span>
         </div>
         <div class="status-card bg-[#fef2f2] border border-[#fee2e2] rounded-[1.5rem] py-4 px-6 flex items-center justify-center gap-4">
