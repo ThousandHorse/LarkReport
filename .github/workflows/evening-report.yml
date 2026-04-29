@@ -2,7 +2,7 @@ name: 夜のデイリーレポート
 
 on:
   schedule:
-    - cron: '0 13 * * *'  # 毎日 UTC 13:00 = JST 22:00
+    - cron: '0 14 * * *'  # 毎日 UTC 14:00 = JST 23:00
   workflow_dispatch:       # 手動実行（テスト用）
 
 jobs:
