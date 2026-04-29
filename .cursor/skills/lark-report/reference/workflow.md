@@ -5,6 +5,7 @@
 - **1PR ずつ着実に進める**: 複数の PR を一度に実装しない。1つの PR が完了・確認できてから次に移る
 - **PR のマージはユーザーが手動で行う**: `gh pr merge` は使わない。PR を作成したら、ユーザーがマージするまで次の PR に進まず待つ
 - **マージ確認後に次の PR へ**: ユーザーから「マージした」「次進めて」などの明示的な指示があってから次の PR の実装を開始する
+- **develop への直接 push 禁止**: コード変更は必ず feature ブランチで行い PR 経由でマージする。`git push origin develop` は絶対に使わない
 
 ---
 
@@ -84,14 +85,17 @@ Task({
 レビューで挙がった「必ず修正すべき問題」を解消してから PR を作成する。
 
 ```bash
-# feature ブランチをリモートにプッシュ（finish は使わない）
+# feature ブランチをリモートにプッシュ
 git push origin feature/PR-XX-description
 
 # PR を作成する
 gh pr create --base develop --title "PR-XX: タイトル"
 ```
 
-> ⚠️ `git flow feature finish` は使わない。マージはユーザーが GitHub 上で手動で行う。
+> ⚠️ **禁止事項（厳守）**
+> - `git flow feature finish` → ローカルで develop にマージしてしまうので使わない
+> - `git push origin develop` → develop への直接 push は禁止
+> - `gh pr merge` → 自動マージは禁止。マージはユーザーが GitHub 上で手動で行う
 
 PR 概要の書き方: [pr-template.md](pr-template.md)
 
