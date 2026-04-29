@@ -156,7 +156,7 @@ export function generateEveningHTML({ date, completed = [], incomplete = [], ove
     .join('') ||
     `<div class="p-4 text-slate-400 text-sm text-center rounded-[2rem] border border-slate-100">完了タスクはありません</div>`;
 
-  // 未完了タスク行（→ 明日へ）
+  // 未完了タスク行
   const incompleteItems = incomplete
     .map(t => `
         <div class="flex items-center p-5 bg-indigo-50/50 border-2 border-indigo-100 rounded-[2rem]">
@@ -292,7 +292,7 @@ if (process.argv[1] && process.argv[1].endsWith('generateHTML.js')) {
       ],
       completedCount: 1,
       overdueCount: 1,
-      aiComment: 'おはようございます！今日も充実した一日にしましょう。\nまずは期限切れになっている設計書のレビューから取り掛かり、全体像を把握してから実装に進むとスムーズです。',
+      aiComment: 'おはようございます！今日も充実した一日にしましょう。まずは期限切れになっている設計書のレビューから取り掛かり、全体像を把握してから実装に進むとスムーズです。',
     });
     writeFileSync('test-morning.html', morningHtml);
     console.log('✅ test-morning.html を生成しました');
