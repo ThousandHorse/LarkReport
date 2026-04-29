@@ -31,14 +31,67 @@ export async function htmlToPng(html) {
   }
 }
 
+// PNG バッファの高さを読み取る（PNG ヘッダの固定オフセット）
+function pngHeight(buf) {
+  return buf.readUInt32BE(20);
+}
+
 // 単体実行テスト用（node src/screenshot.js で動作確認）
 if (process.argv[1] && process.argv[1].endsWith('screenshot.js')) {
-  const testHtml = `<!DOCTYPE html><html><head><script src="https://cdn.tailwindcss.com"></script></head>
-    <body class="p-8 bg-blue-50"><h1 class="text-2xl font-bold text-blue-800">スクショテスト</h1></body></html>`;
-  import('fs').then(({ writeFileSync }) => {
-    htmlToPng(testHtml).then(buf => {
-      writeFileSync('test-screenshot.png', buf);
-      console.log('✅ test-screenshot.png を生成しました');
-    }).catch(console.error);
-  });
+  (async () => {
+    const { writeFileSync } = await import('fs');
+    const { generateMorningHTML } = await import('./generateHTML.js');
+
+    const base = {
+      date: '2026年4月29日（水）',
+      tasks: [{ title: 'API 接続テストの実装' }, { title: 'Slack 通知の動作確認' }],
+      overdueTasks: [{ title: 'プロジェクト設計書のレビュー', overdueDays: 2 }],
+      completedCount: 1,
+      overdueCount: 1,
+    };
+
+    const cases = [
+      {
+        label: '2行',
+        file: 'test-screenshot-2lines.png',
+        aiComment: 'おはようございます！今日も充実した一日にしましょう。\nまずは期限切れのタスクから片付けましょう。',
+      },
+      {
+        label: '5行',
+        file: 'test-screenshot-5lines.png',
+        aiComment: [
+          'おはようございます！今日も充実した一日にしましょう。',
+          'まずは期限切れになっている設計書のレビューから着手することをお勧めします。',
+          '全体像を把握してから実装に進むとスムーズです。',
+          'API 接続テストも重要なので午後に時間を確保してください。',
+          'Slack 通知の確認は最後に行うと効率的です。',
+        ].join('\n'),
+      },
+      {
+        label: '10行',
+        file: 'test-screenshot-10lines.png',
+        aiComment: [
+          'おはようございます！今日も充実した一日にしましょう。',
+          'まずは期限切れになっている設計書のレビューから着手することをお勧めします。',
+          '全体像を把握することで、実装フェーズがスムーズに進みます。',
+          '設計書に不明点があれば早めに確認を取りましょう。',
+          'API 接続テストは実装の中核となる重要なタスクです。',
+          'テスト駆動で進めることで品質が高まります。',
+          'エラーハンドリングも忘れずに実装してください。',
+          'Slack 通知の動作確認は最後のステップとして位置づけましょう。',
+          '今日中に完了できるよう、集中して取り組みましょう。',
+          '充実した一日になることを願っています！',
+        ].join('\n'),
+      },
+    ];
+
+    console.log('--- 動的高さ確認テスト ---');
+    for (const c of cases) {
+      const html = generateMorningHTML({ ...base, aiComment: c.aiComment });
+      const buf = await htmlToPng(html);
+      writeFileSync(c.file, buf);
+      console.log(`✅ ${c.file} (aiComment ${c.label}) → 高さ: ${pngHeight(buf)}px`);
+    }
+    console.log('すべて異なる高さで生成されていれば動的高さ対応OK');
+  })().catch(console.error);
 }
