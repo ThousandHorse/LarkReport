@@ -119,10 +119,25 @@ gh api repos/ThousandHorse/LarkReport/pulls/{PR番号}/comments \
 
 ### 5-3. 対応済みスレッドにリプライ
 
+`-f body=` では改行が反映されないため、`--input` でヒアドキュメントを JSON として渡す。
+
 ```bash
 # 対応内容をリプライとして残す（comment_id は 5-1 で取得した id）
 gh api repos/ThousandHorse/LarkReport/pulls/{PR番号}/comments/{comment_id}/replies \
-  -X POST -f body="対応済みです。〇〇を修正しました（commit: xxxxxxx）。"
+  -X POST --input - << 'EOF'
+{
+  "body": "対応済みです。\n\n〇〇を修正しました（commit: xxxxxxx）。"
+}
+EOF
+```
+
+リプライの推奨フォーマット：
+
+```
+対応済みです。
+
+- 修正内容: 〇〇を〇〇に変更
+- 対応 commit: xxxxxxx
 ```
 
 ### 5-4. スレッドを Resolve
