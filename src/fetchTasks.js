@@ -2,6 +2,9 @@ import { google } from 'googleapis';
 import dotenv from 'dotenv';
 dotenv.config();
 
+// JST は UTC+9。GitHub Actions などの UTC 環境でも正しく当日日付を扱うためオフセットを定数化する
+const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
+
 /**
  * Google Tasks API に接続するクライアントを作成する
  */
@@ -22,7 +25,7 @@ function createAuthClient() {
 }
 
 /**
- * 今日期限のタスクを取得し、完了・未完了に分けて返す
+ * 今日（JST）期限のタスクを取得し、完了・未完了に分けて返す
  *
  * @returns {Promise<{
  *   completed: Array<{title: string, completed: boolean}>,
@@ -35,40 +38,60 @@ function createAuthClient() {
 export async function fetchTodayTasks() {
   try {
     const auth = createAuthClient();
-    const tasks = google.tasks({ version: 'v1', auth });
+    const tasksApi = google.tasks({ version: 'v1', auth });
 
-    const listsRes = await tasks.tasklists.list();
+    // タスクリストの選択
+    // GOOGLE_TASKLIST_NAME が設定されていれば名前で検索、なければ先頭リストを使用する
+    const listsRes = await tasksApi.tasklists.list();
     const items = listsRes.data.items;
     if (!items || items.length === 0) {
       throw new Error('Google Tasks のタスクリストが見つかりませんでした');
     }
-    const listId = items[0].id;
 
-    const today = new Date();
-    const startOfDay = new Date(
-      today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0
-    ).toISOString();
-    const endOfDay = new Date(
-      today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59, 999
-    ).toISOString();
+    const targetName = process.env.GOOGLE_TASKLIST_NAME;
+    const targetList = targetName
+      ? items.find(l => l.title === targetName) ?? items[0]
+      : items[0];
+    const listId = targetList.id;
 
-    const tasksRes = await tasks.tasks.list({
-      tasklist: listId,
-      dueMin: startOfDay,
-      dueMax: endOfDay,
-      showCompleted: true,
-      showHidden: true,
-    });
+    // JST で今日の 0:00〜23:59:59.999 を UTC に変換して API に渡す
+    const nowJST = new Date(Date.now() + JST_OFFSET_MS);
+    const y = nowJST.getUTCFullYear();
+    const m = nowJST.getUTCMonth();
+    const d = nowJST.getUTCDate();
+    const startOfDay = new Date(Date.UTC(y, m, d, 0, 0, 0, 0) - JST_OFFSET_MS).toISOString();
+    const endOfDay = new Date(Date.UTC(y, m, d, 23, 59, 59, 999) - JST_OFFSET_MS).toISOString();
 
-    const allTasks = tasksRes.data.items || [];
+    // nextPageToken を使って全ページのタスクを取得する
+    const allTasks = [];
+    let pageToken;
+    do {
+      const tasksRes = await tasksApi.tasks.list({
+        tasklist: listId,
+        dueMin: startOfDay,
+        dueMax: endOfDay,
+        showCompleted: true,
+        showHidden: true,
+        maxResults: 100,
+        ...(pageToken && { pageToken }),
+      });
+      const pageItems = tasksRes.data.items || [];
+      allTasks.push(...pageItems);
+      pageToken = tasksRes.data.nextPageToken;
+    } while (pageToken);
 
-    const completed = allTasks
-      .filter(t => t.status === 'completed')
-      .map(t => ({ title: t.title, completed: true }));
-
-    const incomplete = allTasks
-      .filter(t => t.status !== 'completed')
-      .map(t => ({ title: t.title, completed: false }));
+    // 1回のループで completed / incomplete に分類する
+    const { completed, incomplete } = allTasks.reduce(
+      (acc, t) => {
+        const isCompleted = t.status === 'completed';
+        acc[isCompleted ? 'completed' : 'incomplete'].push({
+          title: t.title,
+          completed: isCompleted,
+        });
+        return acc;
+      },
+      { completed: [], incomplete: [] }
+    );
 
     const total = allTasks.length;
     const completedCount = completed.length;
@@ -76,7 +99,7 @@ export async function fetchTodayTasks() {
 
     return { completed, incomplete, total, completedCount, progressRate };
   } catch (err) {
-    throw new Error(`Google Tasks の取得に失敗しました: ${err.message}`);
+    throw new Error(`Google Tasks の取得に失敗しました: ${err.message}`, { cause: err });
   }
 }
 
