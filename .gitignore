@@ -1,5 +1,7 @@
 node_modules/
 .env
 *.png
+!test-output/png/*.png
 test-*.html
+!test-output/html/*.html
 dist/
