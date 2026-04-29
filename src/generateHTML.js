@@ -59,6 +59,9 @@ export function generateMorningHTML({ date, tasks, overdueTasks = [], completedC
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
     body { width: 800px; margin: 0; font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif; background-color: #f8fafc; }
     .status-card { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
@@ -98,7 +101,7 @@ export function generateMorningHTML({ date, tasks, overdueTasks = [], completedC
         <div class="bg-blue-500 rounded-2xl p-3 text-white shadow-md flex-shrink-0">
           <span class="text-2xl">🤖</span>
         </div>
-        <div class="text-xl font-medium leading-relaxed">
+        <div class="text-xl font-medium leading-relaxed whitespace-pre-wrap">
           ${escapeHtml(aiComment)}
         </div>
       </div>
