@@ -9,7 +9,10 @@ import { chromium } from '@playwright/test';
 export async function htmlToPng(html) {
   const browser = await chromium.launch();
   try {
-    const page = await browser.newPage();
+    // deviceScaleFactor: 2 = Retina 相当の解像度でレンダリング
+    // レイアウトは 800px 固定のまま PNG の実ピクセルが 2 倍になり Slack で見やすくなる
+    const context = await browser.newContext({ deviceScaleFactor: 2 });
+    const page = await context.newPage();
 
     // 初期高さを十分大きく設定してスクロールバーの発生を防ぐ
     // スクロールバーが出るとコンテンツ幅が減り scrollHeight が不正確になるため
