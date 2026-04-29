@@ -11,19 +11,28 @@ export async function htmlToPng(html) {
   try {
     const page = await browser.newPage();
 
-    // 幅 800px・高さは仮値で初期化（後でコンテンツ高さに合わせる）
-    await page.setViewportSize({ width: 800, height: 600 });
+    // 初期高さを十分大きく設定してスクロールバーの発生を防ぐ
+    // スクロールバーが出るとコンテンツ幅が減り scrollHeight が不正確になるため
+    await page.setViewportSize({ width: 800, height: 3000 });
 
     // HTML 文字列を直接ページにセットする
     // waitUntil: 'networkidle' = Tailwind CDN など全リソースの読み込み完了まで待つ
     await page.setContent(html, { waitUntil: 'networkidle' });
 
-    // レンダリング後のコンテンツ実寸を取得してビューポートを合わせる
-    // これにより PNG の高さがカードサイズにぴったり一致する
+    // body の実寸を取得してビューポートを合わせる
+    // documentElement.scrollHeight はビューポート高さに追従するため body を使用
     const contentHeight = await page.evaluate(
-      () => document.documentElement.scrollHeight
+      () => document.body.scrollHeight
     );
     await page.setViewportSize({ width: 800, height: contentHeight });
+
+    // ビューポート変更後に再度高さを確認（リサイズによる再レイアウトに対応）
+    const finalHeight = await page.evaluate(
+      () => document.body.scrollHeight
+    );
+    if (finalHeight !== contentHeight) {
+      await page.setViewportSize({ width: 800, height: finalHeight });
+    }
 
     return await page.screenshot({ type: 'png' });
   } finally {
