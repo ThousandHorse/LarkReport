@@ -159,9 +159,8 @@ export function generateEveningHTML({ date, completed = [], incomplete = [], ove
   // 未完了タスク行（→ 明日へ）
   const incompleteItems = incomplete
     .map(t => `
-        <div class="flex items-center justify-between p-5 bg-indigo-50/50 border-2 border-indigo-100 rounded-[2rem]">
+        <div class="flex items-center p-5 bg-indigo-50/50 border-2 border-indigo-100 rounded-[2rem]">
           <p class="text-lg text-slate-700 font-bold">${escapeHtml(t.title)}</p>
-          <span class="text-xs font-bold text-indigo-400 ml-3 flex-shrink-0">→ 明日へ</span>
         </div>`)
     .join('');
 
