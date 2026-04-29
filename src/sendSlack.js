@@ -12,6 +12,10 @@ export async function sendToSlack(imageBuffer, filename, message) {
   const token = process.env.SLACK_BOT_TOKEN;
   const channelId = process.env.SLACK_CHANNEL_ID;
 
+  if (!token || !channelId) {
+    throw new Error('環境変数 SLACK_BOT_TOKEN または SLACK_CHANNEL_ID が設定されていません');
+  }
+
   // Step 1: アップロード用 URL を取得する
   const urlRes = await fetch('https://slack.com/api/files.getUploadURLExternal', {
     method: 'POST',
@@ -25,8 +29,9 @@ export async function sendToSlack(imageBuffer, filename, message) {
     }),
   });
 
-  const { upload_url, file_id } = await urlRes.json();
-  if (!upload_url) throw new Error('Slack アップロード URL の取得に失敗しました');
+  const urlData = await urlRes.json();
+  if (!urlData.ok) throw new Error(`Slack アップロード URL 取得失敗: ${urlData.error}`);
+  const { upload_url, file_id } = urlData;
 
   // Step 2: 取得した URL に PNG バイナリを PUT でアップロードする
   const uploadRes = await fetch(upload_url, {
