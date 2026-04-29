@@ -132,19 +132,19 @@ export function generateMorningHTML({ date, tasks, overdueTasks = [], completedC
  * 夜レポートの HTML 文字列を生成する
  *
  * @param {{
- *   date:           string,
- *   completed:      Array<{title: string}>,
- *   incomplete:     Array<{title: string}>,
- *   overdueTasks:   Array<{title: string, overdueDays: number}>,
- *   completedCount: number,
- *   overdueCount:   number,
- *   progressRate:   number,
- *   aiComment:      string
+ *   date:         string,
+ *   completed:    Array<{title: string}>,
+ *   incomplete:   Array<{title: string}>,
+ *   overdueTasks: Array<{title: string, overdueDays: number}>,
+ *   progressRate: number,
+ *   aiComment:    string
  * }} data
  * @returns {string} HTML 文字列
  */
-export function generateEveningHTML({ date, completed = [], incomplete = [], overdueTasks = [], completedCount = 0, overdueCount = 0, progressRate = 0, aiComment = '' }) {
+export function generateEveningHTML({ date, completed = [], incomplete = [], overdueTasks = [], progressRate = 0, aiComment = '' }) {
+  const completedCount = completed.length;
   const incompleteCount = incomplete.length;
+  const overdueCount = overdueTasks.length;
   const safeRate = Math.min(100, Math.max(0, Math.round(Number(progressRate) || 0)));
 
   // 完了タスク行（打ち消し線）
@@ -308,8 +308,6 @@ if (process.argv[1] && process.argv[1].endsWith('generateHTML.js')) {
       overdueTasks: [
         { title: 'プロジェクト設計書のレビュー', overdueDays: 2 },
       ],
-      completedCount: 1,
-      overdueCount: 1,
       progressRate: 33,
       aiComment: '今日もお疲れ様でした！\nAPI 接続テストを完了させた実行力、素晴らしいです。\n期限切れになっている設計書のレビューを明日の午前中に最優先で対処しましょう。',
     });
