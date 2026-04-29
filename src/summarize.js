@@ -8,6 +8,23 @@ if (!apiKey) {
 }
 const genAI = new GoogleGenerativeAI(apiKey);
 
+/**
+ * AI 生成テキストのマークダウン記号を除去してプレーンテキストに整形する
+ *
+ * @param {string} text
+ * @returns {string}
+ */
+function sanitizeComment(text) {
+  return text
+    .replace(/\\n/g, '\n')           // \\n リテラル → 実際の改行
+    .replace(/^\s*[*\-]{3,}\s*$/gm, '') // *** / --- などの区切り行を除去
+    .replace(/\*\*(.+?)\*\*/gs, '$1')   // **bold** のマーカーを除去
+    .replace(/\*(.+?)\*/gs, '$1')       // *italic* のマーカーを除去
+    .replace(/^#+\s*/gm, '')            // # 見出し記号を除去
+    .replace(/\n{2,}/g, '\n')           // 連続改行を1つに圧縮
+    .trim();
+}
+
 // 503（高負荷）のときだけ次のモデルへフォールバックする優先順位
 // gemini-flash-latest は ListModels API で確認済みの有効エイリアス（最新 flash を自動追従）
 const FALLBACK_MODELS = [
@@ -57,11 +74,13 @@ export async function generateMorningComment(tasks = []) {
   const prompt = `以下は今日のタスク一覧です。
 励みになる朝のコメントを日本語で2〜3文で生成してください。
 タスクの優先順位や進め方のアドバイスも含めてください。
-各文の間には改行（\\n）を入れてください。
+各文の間には改行を入れてください。
+マークダウン記法や記号（*, **, #, ---, ***など）は使わず、プレーンテキストで書いてください。
 
 ${taskList}`;
 
-  return generateWithFallback(prompt, '朝コメント');
+  const text = await generateWithFallback(prompt, '朝コメント');
+  return sanitizeComment(text);
 }
 
 /**
@@ -78,10 +97,13 @@ export async function generateEveningComment(tasks = [], progressRate = 0) {
 
   const prompt = `今日の作業結果です。進捗率は ${progressRate}% です。
 振り返りと明日への前向きなアドバイスを日本語で2〜3文で生成してください。
+各文の間には改行を入れてください。
+マークダウン記法や記号（*, **, #, ---, ***など）は使わず、プレーンテキストで書いてください。
 
 ${taskList}`;
 
-  return generateWithFallback(prompt, '夜コメント');
+  const text = await generateWithFallback(prompt, '夜コメント');
+  return sanitizeComment(text);
 }
 
 // 単体実行テスト用（node src/summarize.js で動作確認）
