@@ -1,5 +1,13 @@
 # 実装ワークフロー（サブエージェント）
 
+## 大原則
+
+- **1PR ずつ着実に進める**: 複数の PR を一度に実装しない。1つの PR が完了・確認できてから次に移る
+- **PR のマージはユーザーが手動で行う**: `gh pr merge` は使わない。PR を作成したら、ユーザーがマージするまで次の PR に進まず待つ
+- **マージ確認後に次の PR へ**: ユーザーから「マージした」「次進めて」などの明示的な指示があってから次の PR の実装を開始する
+
+---
+
 ## Step 1: PR 仕様確認（実装前）
 
 **exploreサブエージェント**を起動して `daily-report-plan.md` から対象 PR の仕様を調査する。
@@ -76,9 +84,26 @@ Task({
 レビューで挙がった「必ず修正すべき問題」を解消してから PR を作成する。
 
 ```bash
-git flow feature finish PR-XX-description
-git push origin develop
+# feature ブランチをリモートにプッシュ（finish は使わない）
+git push origin feature/PR-XX-description
+
+# PR を作成する
 gh pr create --base develop --title "PR-XX: タイトル"
 ```
 
+> ⚠️ `git flow feature finish` は使わない。マージはユーザーが GitHub 上で手動で行う。
+
 PR 概要の書き方: [pr-template.md](pr-template.md)
+
+## Step 5: ユーザーのマージ待ち
+
+PR 作成後は **ユーザーがマージするまで次の PR に進まない**。
+
+ユーザーから「マージした」「次進めて」などの指示を受けてから：
+
+```bash
+# develop を最新化してから次の feature ブランチを切る
+git checkout develop
+git pull origin develop
+git flow feature start PR-XX-next-description
+```
