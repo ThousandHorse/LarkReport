@@ -17,15 +17,16 @@ export async function sendToSlack(imageBuffer, filename, message) {
   }
 
   // Step 1: アップロード用 URL を取得する
+  // files.getUploadURLExternal は application/x-www-form-urlencoded 形式で送信する
   const urlRes = await fetch('https://slack.com/api/files.getUploadURLExternal', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${token}`,
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: JSON.stringify({
+    body: new URLSearchParams({
       filename,
-      length: imageBuffer.length,
+      length: String(imageBuffer.length),
     }),
   });
 
@@ -34,10 +35,12 @@ export async function sendToSlack(imageBuffer, filename, message) {
   const { upload_url, file_id } = urlData;
 
   // Step 2: 取得した URL に PNG バイナリを PUT でアップロードする
+  // undici (Node.js fetch) は redirect 時に Buffer の ArrayBuffer が detached になるため
+  // Blob に変換して渡すことで回避する
   const uploadRes = await fetch(upload_url, {
     method: 'PUT',
     headers: { 'Content-Type': 'image/png' },
-    body: imageBuffer,
+    body: new Blob([imageBuffer], { type: 'image/png' }),
   });
 
   if (!uploadRes.ok) throw new Error(`PNG アップロード失敗: ${uploadRes.statusText}`);
