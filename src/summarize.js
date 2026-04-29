@@ -9,6 +9,7 @@ if (!apiKey) {
 const genAI = new GoogleGenerativeAI(apiKey);
 
 // 503（高負荷）のときだけ次のモデルへフォールバックする優先順位
+// gemini-flash-latest は ListModels API で確認済みの有効エイリアス（最新 flash を自動追従）
 const FALLBACK_MODELS = [
   'gemini-2.5-flash',
   'gemini-2.5-flash-lite',
@@ -90,11 +91,13 @@ if (process.argv[1] && process.argv[1].endsWith('summarize.js')) {
     { title: 'Slack 通知の動作確認',          completed: false },
   ];
 
-  console.log('=== 朝コメント生成テスト ===');
-  const morningComment = await generateMorningComment(testTasks);
-  console.log('朝コメント:', morningComment);
+  (async () => {
+    console.log('=== 朝コメント生成テスト ===');
+    const morningComment = await generateMorningComment(testTasks);
+    console.log('朝コメント:', morningComment);
 
-  console.log('\n=== 夜コメント生成テスト ===');
-  const eveningComment = await generateEveningComment(testTasks, 33);
-  console.log('夜コメント:', eveningComment);
+    console.log('\n=== 夜コメント生成テスト ===');
+    const eveningComment = await generateEveningComment(testTasks, 33);
+    console.log('夜コメント:', eveningComment);
+  })().catch(console.error);
 }
