@@ -23,11 +23,15 @@ async function runMorningReport() {
   });
 
   // 3. Gemini API で朝コメントを生成（未完了＋期限切れタスクを渡して実態に即したアドバイスにする）
-  let aiComment;
-  try {
-    aiComment = await generateMorningComment([...overdue, ...incomplete]);
-  } catch (err) {
-    throw new Error(`朝コメントの生成に失敗しました: ${err.message}`, { cause: err });
+  //    タスクが空の場合は Gemini を呼ばず空文字を渡す（HTML 側でフォールバックメッセージを表示）
+  let aiComment = '';
+  const allTasks = [...overdue, ...incomplete];
+  if (allTasks.length > 0) {
+    try {
+      aiComment = await generateMorningComment(allTasks);
+    } catch (err) {
+      throw new Error(`朝コメントの生成に失敗しました: ${err.message}`, { cause: err });
+    }
   }
 
   // 4. HTML を生成

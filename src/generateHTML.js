@@ -97,11 +97,15 @@ export function generateMorningHTML({ date, tasks, overdueTasks = [], completedC
       </div>
 
       <!-- AI コメント -->
+      <!-- TODO: タスクなし時の詳細ガイダンス（Google Tasks への追加手順など）を表示する -->
       <div class="bg-blue-50 border-l-[6px] border-blue-500 p-8 rounded-r-[2rem] mb-12 flex gap-6 items-start shadow-sm text-blue-900">
         <div class="bg-blue-500 rounded-2xl p-3 text-white shadow-md flex-shrink-0">
           <span class="text-2xl">🤖</span>
         </div>
-        <div class="text-xl font-medium leading-relaxed whitespace-pre-wrap">${escapeHtml(aiComment).trim()}</div>
+        ${aiComment.trim()
+          ? `<div class="text-xl font-medium leading-relaxed whitespace-pre-wrap">${escapeHtml(aiComment).trim()}</div>`
+          : `<p class="text-xl font-black text-blue-500">今日のタスクを追加しましょう！</p>`
+        }
       </div>
 
       <!-- タスク一覧 -->
