@@ -51,7 +51,7 @@ async function generateWithFallback(prompt, label) {
  * @param {Array<{title: string}>} tasks - 今日のタスク一覧
  * @returns {Promise<string>} AI が生成したコメント文
  */
-export async function generateMorningComment(tasks) {
+export async function generateMorningComment(tasks = []) {
   const taskList = tasks.map(t => `・${t.title}`).join('\n');
 
   const prompt = `以下は今日のタスク一覧です。
@@ -70,7 +70,7 @@ ${taskList}`;
  * @param {number} progressRate - 進捗率（0〜100）
  * @returns {Promise<string>} AI が生成したコメント文
  */
-export async function generateEveningComment(tasks, progressRate) {
+export async function generateEveningComment(tasks = [], progressRate = 0) {
   const taskList = tasks
     .map(t => `${t.completed ? '✅' : '⬜'} ${t.title}`)
     .join('\n');
