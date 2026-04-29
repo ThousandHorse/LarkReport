@@ -57,6 +57,7 @@ export async function generateMorningComment(tasks = []) {
   const prompt = `以下は今日のタスク一覧です。
 励みになる朝のコメントを日本語で2〜3文で生成してください。
 タスクの優先順位や進め方のアドバイスも含めてください。
+各文の間には改行（\\n）を入れてください。
 
 ${taskList}`;
 
