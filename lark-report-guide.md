@@ -158,22 +158,24 @@ Playwright（Microsoft 製）✅ ← LarkReport はこちらを採用
 
 ---
 
-### 6️⃣ Claude API（AI 要約）
+### 6️⃣ Gemini API（AI 要約）
 
-**一言で言うと：** 「Claude（AI）にプログラムから質問して、答えを受け取る仕組み」
+**一言で言うと：** 「Google の AI（Gemini）にプログラムから質問して、答えを受け取る仕組み」
 
 ```
 普通の使い方：
-  Claude.ai を開く → 手動で質問を入力 → 回答を読む
+  Gemini.google.com を開く → 手動で質問を入力 → 回答を読む
 
-Claude API：
-  プログラムが自動でタスクリストを Claude に送る
-  → Claude が自動でコメントを生成して返してくれる
+Gemini API：
+  プログラムが自動でタスクリストを Gemini に送る
+  → Gemini が自動でコメントを生成して返してくれる
   → レポートに自動で埋め込まれる
 ```
 
 毎日同じような質問を送るのに、毎回手動でやるのは大変です。
 API を使えばプログラムが代わりに質問して答えをもらえます。
+`gemini-2.0-flash` モデルは無料枠で利用可能なため、都度課金が発生しません。
+API キーは Google AI Studio（https://aistudio.google.com/app/apikey）で取得できます。
 
 ---
 
@@ -232,8 +234,8 @@ Google Tasks API に接続して、今日のタスクを全部取得する
 
 ```
 【このファイルがやること】
-Claude API にタスクリストを送る
-Claude が生成したコメント文を受け取る
+Gemini API にタスクリストを送る
+Gemini が生成したコメント文を受け取る
 朝用・夜用でプロンプトを変える
 
 【プロンプトとは？】
@@ -367,23 +369,23 @@ jobs:                      # 「何をするか」の設定
 
 ```
 【普通のコードのダメな書き方】
-const apiKey = "sk-ant-abc123456";  // ← パスワードをコードに直書き
-                                    //   GitHub に上げると全世界に公開される！
+const apiKey = "AIzaxxxxxxxxxxxxxxxx";  // ← パスワードをコードに直書き
+                                        //   GitHub に上げると全世界に公開される！
 
 【正しい書き方：環境変数を使う】
-const apiKey = process.env.ANTHROPIC_API_KEY;  // ← 変数名だけ書く
+const apiKey = process.env.GEMINI_API_KEY;  // ← 変数名だけ書く
 // 実際の値は .env ファイルに書く（GitHub には上げない）
 ```
 
 **.env ファイルの仕組み：**
 ```
 .env ファイル（ローカルのみ・GitHub に上げない）
-  ANTHROPIC_API_KEY=sk-ant-abc123456
+  GEMINI_API_KEY=AIzaxxxxxxxxxxxxxxxx
 
 ↓ dotenv ライブラリが読み込む
 
 コード内
-  process.env.ANTHROPIC_API_KEY → "sk-ant-abc123456" が返ってくる
+  process.env.GEMINI_API_KEY → "AIzaxxxxxxxxxxxxxxxx" が返ってくる
 ```
 
 **GitHub Actions での環境変数：**
@@ -431,7 +433,7 @@ npm run evening  # 夜レポートを手動実行
 | PR-01 | 初期セットアップ | ⭐ | なし |
 | PR-02 | 環境変数 | ⭐ | .env を Git に上げないこと |
 | PR-03 | Google Tasks API | ⭐⭐⭐ | OAuth 認証の設定が一番ハマりやすい |
-| PR-04 | Claude API | ⭐⭐ | API キーの設定だけ注意 |
+| PR-04 | Gemini API | ⭐⭐ | API キーの設定だけ注意（Google AI Studio で取得） |
 | PR-05 | 朝 HTML | ⭐⭐ | Tailwind のクラス名に慣れが必要 |
 | PR-06 | 夜 HTML | ⭐⭐ | PR-05 と同じなので楽になる |
 | PR-09 | Playwright PNG | ⭐⭐ | Chromium のインストールコマンドに注意 |

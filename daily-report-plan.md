@@ -9,7 +9,7 @@ Google Tasks のタスクを毎日自動取得し、Tailwind CSS で美しいビ
 | トリガー | GitHub Actions（朝 7:00 / 夜 22:00） |
 | データ取得元 | Google Tasks API |
 | レポート生成 | Node.js + Tailwind CSS → Playwright で PNG 変換 |
-| AI 要約 | Claude API（claude-sonnet-4-20250514） |
+| AI 要約 | Google Gemini API（gemini-2.0-flash） |
 | 配信先 | Slack Incoming Webhook |
 
 ---
@@ -26,7 +26,7 @@ LarkReport/
 │   ├── fetchTasks.js              # Google Tasks からタスク取得
 │   ├── generateHTML.js            # Tailwind HTML レポート生成
 │   ├── screenshot.js              # Playwright で PNG 変換
-│   ├── summarize.js               # Claude API で AI 要約生成
+│   ├── summarize.js               # Gemini API で AI 要約生成
 │   ├── sendSlack.js               # Slack へ PNG 送信
 │   ├── main-morning.js            # 朝レポート統合スクリプト
 │   └── main-evening.js            # 夜レポート統合スクリプト
@@ -91,7 +91,7 @@ Step 4：全機能の動作確認が取れてから PR を作成する
 | PR-05 | HTML → PNG 変換 | Playwright でローカル HTML を直接スクショ |
 | PR-06 | Slack 送信スクリプト | Bot Token + Files API で PNG 送信・モックアップで E2E 検証 |
 | PR-07 | Google Tasks API 接続 | タスク取得スクリプト |
-| PR-08 | Claude API 接続 | AI 要約スクリプト |
+| PR-08 | Gemini API 接続 | AI 要約スクリプト |
 | PR-09 | 朝レポート HTML テンプレート | モックアップを動的 HTML に変換（朝） |
 | PR-10 | 夜レポート HTML テンプレート | モックアップを動的 HTML に変換（夜） |
 | PR-11 | 朝レポートの統合スクリプト | 全処理をつなぐ main-morning.js |
@@ -123,7 +123,7 @@ Step 4：全機能の動作確認が取れてから PR を作成する
     "evening": "node src/main-evening.js"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.24.0",
+    "@google/generative-ai": "^0.21.0",
     "googleapis": "^140.0.0",
     "@playwright/test": "^1.44.0",
     "dotenv": "^16.0.0",
@@ -169,10 +169,10 @@ GOOGLE_CLIENT_SECRET=あなたのクライアントシークレット
 GOOGLE_REFRESH_TOKEN=あなたのリフレッシュトークン
 
 # ===================================
-# Claude API キー
-# https://console.anthropic.com で取得
+# Gemini API キー
+# https://aistudio.google.com/app/apikey で取得（無料枠あり）
 # ===================================
-ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxxxxxx
+GEMINI_API_KEY=AIzaxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 # ===================================
 # Slack Bot Token
@@ -198,7 +198,7 @@ GitHub Actions で使う場合は、リポジトリの
 - `GOOGLE_CLIENT_ID`
 - `GOOGLE_CLIENT_SECRET`
 - `GOOGLE_REFRESH_TOKEN`
-- `ANTHROPIC_API_KEY`
+- `GEMINI_API_KEY`
 - `SLACK_BOT_TOKEN`
 - `SLACK_CHANNEL_ID`
 
@@ -710,23 +710,23 @@ if (process.argv[1].endsWith('fetchTasks.js')) {
 
 ---
 
-## 🤖 PR-08：Claude API 接続（AI 要約）
+## 🤖 PR-08：Gemini API 接続（AI 要約）
 
 ### やること
-- Claude API を呼び出して、タスク一覧から AI コメントを生成する
+- Google Gemini API を呼び出して、タスク一覧から AI コメントを生成する
 - 朝・夜でプロンプトを変える
+- 無料枠（gemini-2.0-flash）を使用することで都度課金を回避する
 
 ### 作成するファイル
 
 **`src/summarize.js`**
 ```javascript
-import Anthropic from '@anthropic-ai/sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const client = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
 /**
  * 朝レポート用の AI コメントを生成する
@@ -737,22 +737,14 @@ const client = new Anthropic({
 export async function generateMorningComment(tasks) {
   const taskList = tasks.map(t => `・${t.title}`).join('\n');
 
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 200,
-    messages: [
-      {
-        role: 'user',
-        content: `以下は今日のタスク一覧です。
+  const prompt = `以下は今日のタスク一覧です。
 励みになる朝のコメントを日本語で2〜3文で生成してください。
 タスクの優先順位や進め方のアドバイスも含めてください。
 
-${taskList}`,
-      },
-    ],
-  });
+${taskList}`;
 
-  return message.content[0].text;
+  const result = await model.generateContent(prompt);
+  return result.response.text();
 }
 
 // 単体実行テスト用（node src/summarize.js で動作確認）
@@ -778,21 +770,13 @@ export async function generateEveningComment(tasks, progressRate) {
     .map(t => `${t.completed ? '✅' : '⬜'} ${t.title}`)
     .join('\n');
 
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 200,
-    messages: [
-      {
-        role: 'user',
-        content: `今日の作業結果です。進捗率は ${progressRate}% です。
+  const prompt = `今日の作業結果です。進捗率は ${progressRate}% です。
 振り返りと明日への前向きなアドバイスを日本語で2〜3文で生成してください。
 
-${taskList}`,
-      },
-    ],
-  });
+${taskList}`;
 
-  return message.content[0].text;
+  const result = await model.generateContent(prompt);
+  return result.response.text();
 }
 ```
 
@@ -1036,7 +1020,7 @@ async function runMorningReport() {
   console.log('📋 タスクを取得中...');
   const { incomplete } = await fetchTodayTasks();
 
-  // Step 2: Claude API で AI コメント生成
+  // Step 2: Gemini API で AI コメント生成
   console.log('🤖 AI コメントを生成中...');
   const aiComment = await generateMorningComment(incomplete);
 
@@ -1093,7 +1077,7 @@ async function runEveningReport() {
   console.log('📋 タスクを取得中...');
   const { completed, incomplete, total, completedCount, progressRate } = await fetchTodayTasks();
 
-  // Step 2: Claude API で AI コメント生成
+  // Step 2: Gemini API で AI コメント生成
   console.log('🤖 AI コメントを生成中...');
   const allTasks = [...completed, ...incomplete];
   const aiComment = await generateEveningComment(allTasks, progressRate);
@@ -1182,7 +1166,7 @@ jobs:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
         run: npm run morning
@@ -1251,7 +1235,7 @@ jobs:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
           GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
         run: npm run evening
@@ -1277,9 +1261,9 @@ jobs:
 - [ ] Slack App 作成・`files:write` + `chat:write` スコープを付与
 - [ ] Slack Bot Token（`xoxb-`）を取得・投稿先チャンネルに Bot を招待
 - [ ] Slack チャンネル ID を取得
-- [ ] Anthropic API キーを取得
+- [ ] Gemini API キーを取得（Google AI Studio: https://aistudio.google.com/app/apikey）
 - [ ] GitHub リポジトリ作成
-- [ ] GitHub Secrets に全キーを登録（GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET / GOOGLE_REFRESH_TOKEN / ANTHROPIC_API_KEY / SLACK_BOT_TOKEN / SLACK_CHANNEL_ID）
+- [ ] GitHub Secrets に全キーを登録（GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET / GOOGLE_REFRESH_TOKEN / GEMINI_API_KEY / SLACK_BOT_TOKEN / SLACK_CHANNEL_ID）
 
 ### PR 実装チェック（デバッグ確認 → マージ → 次の PR の順で進める）
 
@@ -1293,7 +1277,7 @@ jobs:
 
 **フェーズ2：API 接続**
 - [ ] PR-07：Google Tasks 取得スクリプト・タスク取得成功を確認
-- [ ] PR-08：Claude API 要約スクリプト・AI コメント生成を確認
+- [ ] PR-08：Gemini API 要約スクリプト・AI コメント生成を確認
 
 **フェーズ3：動的テンプレート＋統合**
 - [ ] PR-09：朝 HTML テンプレート（動的化）・ブラウザで目視確認
@@ -1321,7 +1305,7 @@ Week 1：準備・デザイン確定・パイプライン検証
 
 Week 2：API 接続
   Day 7: PR-07（Google Tasks 接続テスト）
-  Day 8: PR-08（Claude API 接続テスト）
+  Day 8: PR-08（Gemini API 接続テスト）
 
 Week 3：動的テンプレート＋統合
   Day 9:  PR-09（朝 HTML 動的化）

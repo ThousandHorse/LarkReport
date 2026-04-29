@@ -26,6 +26,22 @@ const screenshot = await page.screenshot({ type: 'png', fullPage: true });
 - `page.goto()` は使わない（外部 URL 不要）
 - `waitUntil: 'networkidle'` で Tailwind CDN の JS 実行完了を保証
 
+## summarize.js
+
+```javascript
+import { GoogleGenerativeAI } from '@google/generative-ai';
+// gemini-2.0-flash は無料枠で利用可能
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+
+// テキスト生成
+const result = await model.generateContent(prompt);
+return result.response.text();
+```
+
+- API キーは Google AI Studio（https://aistudio.google.com/app/apikey）で取得
+- `GEMINI_API_KEY` 環境変数で管理（`AIza` で始まる）
+
 ## sendSlack.js（3ステップ必須）
 
 ```javascript

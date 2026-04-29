@@ -13,7 +13,7 @@ description: >-
 ```
 Google Tasks API
   ↓ fetchTodayTasks()          → { completed, incomplete, total, completedCount, progressRate }
-Claude API
+Gemini API（gemini-2.0-flash・無料枠）
   ↓ generateMorningComment()   → aiComment（朝）
   ↓ generateEveningComment()   → aiComment（夜）
 generateMorningHTML() / generateEveningHTML()   ← Tailwind CSS CDN
@@ -37,12 +37,12 @@ Slack チャンネル（PNG 添付）
 
 ```bash
 GOOGLE_CLIENT_ID=        GOOGLE_CLIENT_SECRET=        GOOGLE_REFRESH_TOKEN=
-ANTHROPIC_API_KEY=sk-ant-...
+GEMINI_API_KEY=AIza...       # Google AI Studio で取得（無料枠あり）
 SLACK_BOT_TOKEN=xoxb-...   # スコープ: files:write, chat:write
 SLACK_CHANNEL_ID=C...       # チャンネル詳細の最下部で確認
 ```
 
-GitHub Secrets: 上記6変数を全て登録する
+GitHub Secrets: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN`, `GEMINI_API_KEY`, `SLACK_BOT_TOKEN`, `SLACK_CHANNEL_ID`
 
 ## 実装ワークフロー
 
