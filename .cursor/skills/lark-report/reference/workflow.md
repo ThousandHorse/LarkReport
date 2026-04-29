@@ -138,7 +138,13 @@ EOF
 
 - 修正内容: 〇〇を〇〇に変更
 - 対応 commit: xxxxxxx
+
+---
+*Comment by Cursor*
 ```
+
+> ⚠️ **必須**: リプライ末尾に必ず `---\n*Comment by Cursor*` を付けること。
+> AI によるコメントであることをレビュアーが識別できるようにする。
 
 ### 5-4. スレッドを Resolve
 
