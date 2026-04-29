@@ -88,9 +88,11 @@ Task({
 # feature ブランチをリモートにプッシュ
 git push origin feature/PR-XX-description
 
-# PR を作成する
+# PR を作成する（必ず --base develop を指定すること）
 gh pr create --base develop --title "PR-XX: タイトル"
 ```
+
+> ⚠️ `--base develop` を**必ず**付けること。省略するとデフォルトブランチ（main）がベースになる。
 
 > ⚠️ **禁止事項（厳守）**
 > - `git flow feature finish` → ローカルで develop にマージしてしまうので使わない
