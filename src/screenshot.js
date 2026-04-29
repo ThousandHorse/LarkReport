@@ -11,27 +11,28 @@ export async function htmlToPng(html) {
   try {
     const page = await browser.newPage();
 
-    // ビューポートを 800px × 1200px に設定（レポートの固定幅に合わせる）
-    await page.setViewportSize({ width: 800, height: 1200 });
+    // 幅 800px・高さは仮値で初期化（後でコンテンツ高さに合わせる）
+    await page.setViewportSize({ width: 800, height: 600 });
 
     // HTML 文字列を直接ページにセットする
     // waitUntil: 'networkidle' = Tailwind CDN など全リソースの読み込み完了まで待つ
     await page.setContent(html, { waitUntil: 'networkidle' });
 
-    // ページ全体のスクリーンショットを PNG で撮影する
-    // fullPage: true = スクロールが必要な部分も全てキャプチャ
-    // return await でスクリーンショット完了を finally の前に保証する
-    return await page.screenshot({
-      type: 'png',
-      fullPage: true,
-    });
+    // レンダリング後のコンテンツ実寸を取得してビューポートを合わせる
+    // これにより PNG の高さがカードサイズにぴったり一致する
+    const contentHeight = await page.evaluate(
+      () => document.documentElement.scrollHeight
+    );
+    await page.setViewportSize({ width: 800, height: contentHeight });
+
+    return await page.screenshot({ type: 'png' });
   } finally {
     await browser.close();
   }
 }
 
 // 単体実行テスト用（node src/screenshot.js で動作確認）
-if (process.argv[1].endsWith('screenshot.js')) {
+if (process.argv[1] && process.argv[1].endsWith('screenshot.js')) {
   const testHtml = `<!DOCTYPE html><html><head><script src="https://cdn.tailwindcss.com"></script></head>
     <body class="p-8 bg-blue-50"><h1 class="text-2xl font-bold text-blue-800">スクショテスト</h1></body></html>`;
   import('fs').then(({ writeFileSync }) => {
