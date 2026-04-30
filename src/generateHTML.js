@@ -67,8 +67,8 @@ export function generateMorningHTML({ date, tasks, overdueTasks = [], completedC
     .status-card { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
   </style>
 </head>
-<body class="p-8">
-  <div class="bg-white rounded-[3rem] shadow-xl overflow-hidden border border-blue-100">
+<body>
+  <div class="bg-white overflow-hidden">
 
     <!-- ヘッダー -->
     <div class="bg-gradient-to-r from-blue-600 to-cyan-500 p-10 text-white">
@@ -194,8 +194,8 @@ export function generateEveningHTML({ date, completed = [], incomplete = [], ove
     .status-card { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
   </style>
 </head>
-<body class="p-8">
-  <div class="bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-slate-800">
+<body>
+  <div class="bg-white overflow-hidden">
 
     <!-- ヘッダー -->
     <div class="bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 p-10 text-white">
