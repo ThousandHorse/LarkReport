@@ -6,7 +6,7 @@ Google Tasks のタスクを毎日自動取得し、Tailwind CSS で美しいビ
 
 | 項目 | 内容 |
 |------|------|
-| トリガー | GitHub Actions（朝 5:00 / 夜 23:00） |
+| トリガー | GitHub Actions（朝 7:00 / 夜 23:00） |
 | データ取得元 | Google Tasks API |
 | レポート生成 | Node.js + Tailwind CSS → Playwright で PNG 変換 |
 | AI 要約 | Google Gemini API（gemini-2.0-flash） |
@@ -20,7 +20,7 @@ Google Tasks のタスクを毎日自動取得し、Tailwind CSS で美しいビ
 LarkReport/
 ├── .github/
 │   └── workflows/
-│       ├── morning-report.yml     # 朝 5:00 トリガー
+│       ├── morning-report.yml     # 朝 7:00 トリガー
 │       └── evening-report.yml     # 夜 23:00 トリガー
 ├── src/
 │   ├── fetchTasks.js              # Google Tasks からタスク取得
@@ -1119,8 +1119,8 @@ runEveningReport().catch(console.error);
 ## ⚙️ PR-13：GitHub Actions 朝ワークフロー
 
 ### やること
-- GitHub Actions に朝 5:00（JST）に自動実行されるワークフローを定義する
-- JST（日本時間）は UTC+9 なので、GitHub Actions の cron は UTC 基準で 20:00 に設定する
+- GitHub Actions に朝 7:00（JST）に自動実行されるワークフローを定義する
+- JST（日本時間）は UTC+9 なので、GitHub Actions の cron は UTC 基準で 22:00 に設定する
 
 ### 作成するファイル
 
@@ -1128,10 +1128,10 @@ runEveningReport().catch(console.error);
 ```yaml
 name: 朝のデイリーレポート
 
-# 毎日 UTC 20:00 = JST 05:00 に実行
+# 毎日 UTC 22:00 = JST 07:00 に実行
 on:
   schedule:
-    - cron: '0 20 * * *'
+    - cron: '0 22 * * *'
   # 手動実行も可能にする（テスト用）
   workflow_dispatch:
 
