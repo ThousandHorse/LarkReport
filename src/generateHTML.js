@@ -63,12 +63,12 @@ export function generateMorningHTML({ date, tasks, overdueTasks = [], completedC
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
-    body { width: 800px; margin: 0; font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif; background-color: #f8fafc; }
+    body { width: 800px; min-height: 900px; margin: 0; font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif; background-color: #f8fafc; }
     .status-card { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
   </style>
 </head>
-<body class="p-8">
-  <div class="bg-white rounded-[3rem] shadow-xl overflow-hidden border border-blue-100">
+<body>
+  <div class="bg-white overflow-hidden">
 
     <!-- ヘッダー -->
     <div class="bg-gradient-to-r from-blue-600 to-cyan-500 p-10 text-white">
@@ -190,12 +190,12 @@ export function generateEveningHTML({ date, completed = [], incomplete = [], ove
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
-    body { width: 800px; margin: 0; font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif; background-color: #0f172a; }
+    body { width: 800px; min-height: 900px; margin: 0; font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif; background-color: #0f172a; }
     .status-card { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
   </style>
 </head>
-<body class="p-8">
-  <div class="bg-white rounded-[3rem] shadow-2xl overflow-hidden border border-slate-800">
+<body>
+  <div class="bg-white overflow-hidden">
 
     <!-- ヘッダー -->
     <div class="bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-900 p-10 text-white">
