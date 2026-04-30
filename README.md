@@ -4,7 +4,7 @@ Google Tasks の今日のタスクを取得し、Tailwind CSS でビジュアル
 
 ## 機能
 
-- 朝レポート（毎日 7:00 JST）：今日のタスク一覧 + AI コメント
+- 朝レポート（毎日 5:00 JST）：今日のタスク一覧 + AI コメント
 - 夜レポート（毎日 23:00 JST）：当日の進捗・達成率 + AI コメント
 
 ## 技術スタック
@@ -54,4 +54,4 @@ npm run evening   # 夜レポートを手動実行
 ## GitHub Actions
 
 `Settings → Secrets and variables → Actions` に上記6変数を登録すると、
-スケジュール自動実行（朝 7:00 / 夜 23:00 JST）が有効になる。
+スケジュール自動実行（朝 5:00 / 夜 23:00 JST）が有効になる。
