@@ -23,7 +23,7 @@ export async function sendToSlack(imageBuffer, filename, message) {
     channel_id: channelId,
     file: imageBuffer,
     filename,
-    initial_comment: message,
+    initial_comment: `<!channel> ${message}`,
   });
 
   console.log('✅ Slack に PNG レポートを送信しました');
