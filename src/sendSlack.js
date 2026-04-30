@@ -8,8 +8,9 @@ dotenv.config();
  * @param {Buffer} imageBuffer - PNG 画像のバイナリデータ
  * @param {string} filename    - ファイル名（例: morning-report.png）
  * @param {string} message     - 画像に添えるテキストメッセージ
+ * @param {string} mention     - メッセージ先頭に付与するメンション（デフォルト: '<!channel>'、不要なら '' を渡す）
  */
-export async function sendToSlack(imageBuffer, filename, message) {
+export async function sendToSlack(imageBuffer, filename, message, mention = '<!channel>') {
   const token = process.env.SLACK_BOT_TOKEN;
   const channelId = process.env.SLACK_CHANNEL_ID;
 
@@ -23,7 +24,7 @@ export async function sendToSlack(imageBuffer, filename, message) {
     channel_id: channelId,
     file: imageBuffer,
     filename,
-    initial_comment: `<!channel>\n${message}`,
+    initial_comment: mention ? `${mention}\n${message}` : message,
   });
 
   console.log('✅ Slack に PNG レポートを送信しました');
