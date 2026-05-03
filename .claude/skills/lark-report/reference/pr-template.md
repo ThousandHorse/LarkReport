@@ -45,7 +45,7 @@ node src/xxx.js
 
 ## 関連情報
 
-- 実装詳細: [daily-report-plan.md](../daily-report-plan.md) PR-XX
+- 実装詳細: [daily-report-plan.md](../../../../daily-report-plan.md) PR-XX
 - 依存する PR: PR-XX（マージ済み）
 ```
 
