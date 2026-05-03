@@ -81,7 +81,7 @@ PR 概要の書き方: [reference/pr-template.md](reference/pr-template.md)
 
 ## PR 実装フェーズ
 
-詳細仕様: [daily-report-plan.md](../../daily-report-plan.md)
+詳細仕様: [daily-report-plan.md](../../../daily-report-plan.md)
 
 ```
 フェーズ1（PR-01〜06）: パイプライン検証
@@ -109,3 +109,8 @@ npm run evening           # 夜レポートE2E実行
 ```
 
 トラブルシューティング: [reference/troubleshooting.md](reference/troubleshooting.md)
+
+## スキルの更新ルール
+
+仕様・運用方法に変更があった場合は、このスキルファイル（および `reference/` 配下の該当ファイル）を必ず更新すること。
+`.cursor/skills/lark-report/` と `.claude/skills/lark-report/` は同じ内容を維持する。
