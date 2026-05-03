@@ -5,10 +5,11 @@
 ```javascript
 import { google } from 'googleapis';
 // OAuth2 - アクセストークンをリフレッシュトークンから自動取得
-const auth = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET);
+const auth = new google.auth.OAuth2(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET);
 auth.setCredentials({ refresh_token: process.env.GOOGLE_REFRESH_TOKEN });
-// 今日の期限タスクのみ取得
-tasks.tasks.list({ dueMin: startOfDay, dueMax: endOfDay, showCompleted: true, showHidden: true })
+const tasksApi = google.tasks({ version: 'v1', auth });
+// 今日の期限タスクのみ取得（tasklist は必須パラメータ）
+tasksApi.tasks.list({ tasklist: listId, dueMin: startOfDay, dueMax: endOfDay, showCompleted: true, showHidden: true })
 ```
 
 戻り値の型: `{ completed: [], incomplete: [], total: number, completedCount: number, progressRate: number }`
@@ -52,22 +53,19 @@ for (let i = 0; i < FALLBACK_MODELS.length; i++) {
 - `GEMINI_API_KEY` 環境変数で管理（`AIza` で始まる）
 - `gemini-2.0-flash` はプロジェクトによって無料枠クォータが 0 の場合あり → `gemini-2.5-flash` を使用
 
-## sendSlack.js（3ステップ必須）
+## sendSlack.js
 
 ```javascript
-// Step 1: アップロード URL を取得
-POST https://slack.com/api/files.getUploadURLExternal
-  body: { filename, length: imageBuffer.length }
-  → { upload_url, file_id }
+import { WebClient } from '@slack/web-api';
+const client = new WebClient(process.env.SLACK_BOT_TOKEN);
 
-// Step 2: PNG をアップロード
-PUT upload_url
-  headers: { 'Content-Type': 'image/png' }
-  body: imageBuffer
-
-// Step 3: チャンネルに投稿
-POST https://slack.com/api/files.completeUploadExternal
-  body: { files: [{ id: file_id }], channel_id, initial_comment: message }
+// filesUploadV2 を使用（内部で3ステップのアップロードを完結）
+await client.filesUploadV2({
+  channel_id: process.env.SLACK_CHANNEL_ID,
+  file: imageBuffer,
+  filename,
+  initial_comment: message,
+});
 ```
 
 - Incoming Webhook は PNG 添付不可のため使わない
