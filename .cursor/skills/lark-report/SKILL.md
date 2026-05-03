@@ -113,4 +113,13 @@ npm run evening           # 夜レポートE2E実行
 ## スキルの更新ルール
 
 仕様・運用方法に変更があった場合は、このスキルファイル（および `reference/` 配下の該当ファイル）を必ず更新すること。
-`.cursor/skills/lark-report/` と `.claude/skills/lark-report/` は同じ内容を維持する。
+
+**`.cursor/skills/lark-report/` と `.claude/skills/lark-report/` は常に同じ内容を維持すること。**
+片方を変更したら、必ずもう片方にも同じ変更を加える（同期漏れ禁止）。
+
+対象ファイル（両方を必ず同時に更新する）：
+- `SKILL.md`
+- `reference/modules.md`
+- `reference/pr-template.md`
+- `reference/troubleshooting.md`
+- `reference/workflow.md`（署名 `*Comment by Cursor*` / `*Comment by Claude*` のみ異なる）
