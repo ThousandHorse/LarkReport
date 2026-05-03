@@ -3,8 +3,8 @@ dotenv.config();
 import { fetchTodayTasks } from './fetchTasks.js';
 import { generateEveningComment } from './summarize.js';
 import { generateEveningHTML } from './generateHTML.js';
-import { htmlToPng } from './screenshot.js';
-import { sendToSlack } from './sendSlack.js';
+import { htmlToPng } from '../../shared/screenshot.js';
+import { sendToSlack } from '../../shared/sendSlack.js';
 
 /**
  * 夜レポートを生成して Slack に送信する

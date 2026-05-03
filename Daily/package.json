@@ -1,0 +1,9 @@
+{
+  "name": "Daily",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "morning": "node src/main-morning.js",
+    "evening": "node src/main-evening.js"
+  }
+}
