@@ -116,6 +116,7 @@ gh api repos/ThousandHorse/LarkReport/pulls/{PR番号}/comments \
 ### 5-2. 修正・コミット・プッシュ
 
 指摘に対してコードまたはドキュメントを修正し、feature ブランチにコミット＆プッシュする。
+**指摘が複数ある場合は、1つの指摘につき1コミットに分けること。** まとめてコミットしない。
 
 ### 5-3. 対応済みスレッドにリプライ
 
@@ -148,38 +149,9 @@ EOF
 
 ### 5-4. スレッドを Resolve
 
-```bash
-# GraphQL でスレッドを Resolved に変更（thread_id は GraphQL で取得）
-gh api graphql -f query='
-mutation {
-  resolveReviewThread(input: {threadId: "PRRT_xxx"}) {
-    thread { isResolved }
-  }
-}'
-```
+**Resolve はユーザーが手動で行う。** Cursor/Claude はリプライを投稿するところまでで止める。
 
-スレッド ID の取得：
-
-```bash
-gh api graphql -f query='
-{
-  repository(owner: "ThousandHorse", name: "LarkReport") {
-    pullRequest(number: {PR番号}) {
-      reviewThreads(first: 20) {
-        nodes {
-          id
-          isResolved
-          comments(first: 1) {
-            nodes { author { login } path body }
-          }
-        }
-      }
-    }
-  }
-}' --jq '.data.repository.pullRequest.reviewThreads.nodes[] | {id, resolved: .isResolved, path: .comments.nodes[0].path}'
-```
-
-> **対応不要と判断した指摘**も、その理由をリプライに記載してから Resolve する。
+> **対応不要と判断した指摘**も、その理由をリプライに記載してユーザーに Resolve を依頼する。
 
 ---
 
