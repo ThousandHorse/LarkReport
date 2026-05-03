@@ -24,10 +24,14 @@ function classifyEvent(title) {
 }
 
 export async function fetchCalendarEvents(targetDate = new Date()) {
-  const startOfDay = new Date(targetDate);
-  startOfDay.setHours(0, 0, 0, 0);
-  const endOfDay = new Date(targetDate);
-  endOfDay.setHours(23, 59, 59, 999);
+  // JST (UTC+9) で 0:00〜23:59 を計算する
+  // GitHub Actions は UTC 環境のため setHours() では 9 時間ズレが生じる
+  const JST_OFFSET = 9 * 60 * 60 * 1000;
+  const dateStr = new Date(targetDate.getTime() + JST_OFFSET)
+    .toISOString()
+    .slice(0, 10); // "YYYY-MM-DD"
+  const startOfDay = new Date(`${dateStr}T00:00:00+09:00`);
+  const endOfDay   = new Date(`${dateStr}T23:59:59+09:00`);
 
   const calendar = google.calendar({ version: 'v3', auth });
 
@@ -61,19 +65,20 @@ export async function fetchCalendarEvents(targetDate = new Date()) {
       };
     });
 
-  const summary = {
-    engineer: 0,
-    photographer: 0,
-    private: 0,
-    totalWorkMinutes: 0,
-  };
+  const summary = Object.fromEntries(
+    CATEGORY_RULES.map(r => [r.category, 0])
+  );
+  summary.totalWorkMinutes = 0;
 
   for (const ev of events) {
     if (ev.category in summary) {
       summary[ev.category] += ev.durationMinutes;
     }
   }
-  summary.totalWorkMinutes = summary.engineer + summary.photographer;
+  // private 以外のカテゴリ（就労時間）を合算
+  summary.totalWorkMinutes = CATEGORY_RULES
+    .filter(r => r.category !== 'private')
+    .reduce((acc, r) => acc + summary[r.category], 0);
 
   return { events, summary };
 }
