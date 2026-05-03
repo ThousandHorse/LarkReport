@@ -62,24 +62,24 @@ export async function fetchCalendarEvents(targetDate = new Date()) {
     });
 
   const summary = {
-    engineer:     { totalMinutes: 0, label: '💻 エンジニア' },
-    photographer: { totalMinutes: 0, label: '📷 カメラマン' },
-    private:      { totalMinutes: 0, label: '🏖️ プライベート' },
+    engineer: 0,
+    photographer: 0,
+    private: 0,
     totalWorkMinutes: 0,
   };
 
   for (const ev of events) {
-    if (summary[ev.category] !== undefined) {
-      summary[ev.category].totalMinutes += ev.durationMinutes;
+    if (ev.category in summary) {
+      summary[ev.category] += ev.durationMinutes;
     }
   }
-  summary.totalWorkMinutes =
-    summary.engineer.totalMinutes + summary.photographer.totalMinutes;
+  summary.totalWorkMinutes = summary.engineer + summary.photographer;
 
   return { events, summary };
 }
 
 if (process.argv[1] && process.argv[1].endsWith('fetchCalendar.js')) {
-  const result = await fetchCalendarEvents();
-  console.log(JSON.stringify(result, null, 2));
+  fetchCalendarEvents()
+    .then(result => console.log(JSON.stringify(result, null, 2)))
+    .catch(err => { console.error(err); process.exit(1); });
 }
