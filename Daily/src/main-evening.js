@@ -1,5 +1,7 @@
 import dotenv from 'dotenv';
-dotenv.config();
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
+dotenv.config({ path: resolve(dirname(fileURLToPath(import.meta.url)), '../../.env') });
 import { fetchTodayTasks } from './fetchTasks.js';
 import { generateEveningComment } from './summarize.js';
 import { generateEveningHTML } from './generateHTML.js';
