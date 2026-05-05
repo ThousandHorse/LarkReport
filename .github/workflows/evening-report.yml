@@ -24,9 +24,11 @@ jobs:
 
       - name: Playwright (Chromium) をインストール
         run: npx playwright install --with-deps chromium
+        working-directory: Daily
 
       - name: 夜レポートを実行して Slack に送信
         run: npm run evening
+        working-directory: Daily
         env:
           GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
           GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}

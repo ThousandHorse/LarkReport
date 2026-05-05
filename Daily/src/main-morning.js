@@ -1,10 +1,9 @@
-import dotenv from 'dotenv';
-dotenv.config();
+import './env.js';
 import { fetchTodayTasks } from './fetchTasks.js';
 import { generateMorningComment } from './summarize.js';
 import { generateMorningHTML } from './generateHTML.js';
-import { htmlToPng } from './screenshot.js';
-import { sendToSlack } from './sendSlack.js';
+import { htmlToPng } from '../../shared/screenshot.js';
+import { sendToSlack } from '../../shared/sendSlack.js';
 
 /**
  * 朝レポートを生成して Slack に送信する
