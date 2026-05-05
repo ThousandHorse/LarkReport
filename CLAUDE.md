@@ -3,9 +3,9 @@
 Google Tasks のタスクを毎日自動取得し、Tailwind CSS でビジュアルレポート（PNG）を生成して Slack に自動配信するツール。
 
 ## プロジェクト構成
-- Daily/：タスクレポートツール（`src/` から移動済み）
+- apps/Daily/：タスクレポートツール
+- apps/Zeny/：収支レポートツール（新規追加）
 - shared/：Daily・Zeny 共通モジュール（screenshot.js, sendSlack.js）
-- Zeny/：収支レポートツール（新規追加）
 - `package.json` / `.env.example`：ルートで一元管理（Daily・Zeny 共通）
 
 ## アーキテクチャ
@@ -44,8 +44,8 @@ Slack チャンネル（PNG 添付）
 - テストを通すために実装側を修正すること
 
 ## 既存モジュールの流用（Zeny）
-- `shared/screenshot.js` を `import { htmlToPng } from '../../shared/screenshot.js'` で参照
-- `shared/sendSlack.js`  を `import { sendToSlack } from '../../shared/sendSlack.js'` で参照
+- `shared/screenshot.js` を `import { htmlToPng } from '../../../shared/screenshot.js'` で参照
+- `shared/sendSlack.js`  を `import { sendToSlack } from '../../../shared/sendSlack.js'` で参照
 
 ## 環境変数
 
@@ -79,8 +79,8 @@ GitHub Secrets: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKE
 ## 単体テスト実行コマンド
 
 ```bash
-node Daily/src/fetchTasks.js    # Google Tasks 取得確認
-node Daily/src/summarize.js     # AI コメント生成確認
+node apps/Daily/src/fetchTasks.js    # Google Tasks 取得確認
+node apps/Daily/src/summarize.js     # AI コメント生成確認
 node shared/screenshot.js       # test-output/png/*.png 生成確認
 npm run morning                 # 朝レポート E2E 実行（ルートから）
 npm run evening                 # 夜レポート E2E 実行（ルートから）

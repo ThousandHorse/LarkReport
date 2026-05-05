@@ -4,8 +4,8 @@
   "description": "Google Tasks を Slack に自動レポート配信するツール",
   "type": "module",
   "scripts": {
-    "morning": "node Daily/src/main-morning.js",
-    "evening": "node Daily/src/main-evening.js"
+    "morning": "node apps/Daily/src/main-morning.js",
+    "evening": "node apps/Daily/src/main-evening.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
