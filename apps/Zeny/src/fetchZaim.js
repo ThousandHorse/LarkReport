@@ -83,16 +83,17 @@ async function zaimRequest(url) {
 
 /**
  * 指定日（JST）の支出・収入を取得して集計する。
- * @param {Date} targetDate - UTC ベースの Date オブジェクト（デフォルト: 今日）
+ * @param {Date}   targetDate - UTC ベースの Date オブジェクト（デフォルト: 今日）
+ * @param {number} limit      - 取得件数の上限（デフォルト: 100）
  * @returns {Promise<{ payments: Array, incomes: Array, summary: Object }>}
  */
-export async function fetchZaimEntries(targetDate = new Date()) {
+export async function fetchZaimEntries(targetDate = new Date(), limit = 100) {
   // JST はサマータイム不使用のため Intl.DateTimeFormat で安全に日付文字列を取得できる
   const dateStr = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Tokyo' })
     .format(targetDate); // => "YYYY-MM-DD"
 
   // WHY: 個人用途では1日100件を超えることは想定しないため、ページネーションは省略
-  const url = `${ZAIM_API_BASE}/home/money?start_date=${dateStr}&end_date=${dateStr}&limit=100`;
+  const url = `${ZAIM_API_BASE}/home/money?start_date=${dateStr}&end_date=${dateStr}&limit=${limit}`;
   const data = await zaimRequest(url);
 
   const entries = data.money || [];
