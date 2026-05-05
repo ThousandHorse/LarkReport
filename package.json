@@ -12,6 +12,7 @@
     "@playwright/test": "^1.44.0",
     "@slack/web-api": "^7.15.1",
     "dotenv": "^16.0.0",
-    "googleapis": "^171.4.0"
+    "googleapis": "^171.4.0",
+    "oauth-1.0a": "^2.2.6"
   }
 }
