@@ -81,7 +81,7 @@ GitHub Secrets: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKE
 ```bash
 node Daily/src/fetchTasks.js    # Google Tasks 取得確認
 node Daily/src/summarize.js     # AI コメント生成確認
-node shared/screenshot.js       # Daily/test-output/png/*.png 生成確認
+node shared/screenshot.js       # test-output/png/*.png 生成確認
 npm run morning                 # 朝レポート E2E 実行（ルートから）
 npm run evening                 # 夜レポート E2E 実行（ルートから）
 ```
