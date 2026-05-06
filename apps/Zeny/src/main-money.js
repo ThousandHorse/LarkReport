@@ -122,11 +122,10 @@ async function runMoneyReport() {
   const png = await htmlToPng(html);
 
   // 5. JST 日付文字列を生成（例: 2026/05/06（水））
-  const WEEKDAYS = ['日', '月', '火', '水', '木', '金', '土'];
-  const jstStr = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Asia/Tokyo' }).format(targetDate);
-  const [jy, jmo, jd] = jstStr.split('-').map(Number);
-  const weekday = WEEKDAYS[new Date(`${jstStr}T12:00:00+09:00`).getDay()];
-  const date = `${jy}/${String(jmo).padStart(2, '0')}/${String(jd).padStart(2, '0')}（${weekday}）`;
+  const date = new Intl.DateTimeFormat('ja-JP', {
+    year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short',
+    timeZone: 'Asia/Tokyo',
+  }).format(targetDate).replace(/\((.+?)\)/, '（$1）');
 
   // 6. Slack に送信
   await sendToSlack(png, 'money-report.png', `💴 ${date} 収支レポートが届きました！`);
