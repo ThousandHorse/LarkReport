@@ -15,11 +15,12 @@ import { WebClient } from '@slack/web-api';
 /**
  * レポート PNG とボタンを Slack に送信する。
  *
- * @param {Buffer} imageBuffer - PNG 画像のバイナリデータ
- * @param {string} dateLabel   - 日付ラベル（例: "2026/05/06（水）"）
+ * @param {Buffer} imageBuffer        - PNG 画像のバイナリデータ
+ * @param {string} dateLabel          - 日付ラベル（例: "2026/05/06（水）"）
+ * @param {string} [mention='<!channel>'] - メンション文字列（不要な場合は '' を渡す）
  * @returns {Promise<void>}
  */
-export async function sendReportWithButton(imageBuffer, dateLabel) {
+export async function sendReportWithButton(imageBuffer, dateLabel, mention = '<!channel>') {
   const token     = process.env.SLACK_BOT_TOKEN;
   const channelId = process.env.SLACK_CHANNEL_ID;
 
@@ -34,7 +35,7 @@ export async function sendReportWithButton(imageBuffer, dateLabel) {
     channel_id: channelId,
     file: imageBuffer,
     filename: 'money-report.png',
-    initial_comment: `<!channel>\n💴 ${dateLabel} 収支レポートが届きました！`,
+    initial_comment: mention ? `${mention}\n💴 ${dateLabel} 収支レポートが届きました！` : `💴 ${dateLabel} 収支レポートが届きました！`,
   });
 
   // 2. ボタンブロックを別メッセージで送信
