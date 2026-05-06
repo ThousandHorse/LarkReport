@@ -20,7 +20,8 @@ Zaim の収支データを毎日自動取得し、Tailwind CSS で収支レポ�
 LarkReport/
 ├── .github/
 │   └── workflows/
-│       └── money-report.yml          # 毎日 23:00 JST トリガー
+│       ├── money-report.yml          # 毎日 23:00 JST トリガー      ✅ PR-20
+│       └── slack-modal.yml           # slackModal 起動ワークフロー   🔜 PR-17C
 ├── apps/
 │   └── Zeny/
 │       ├── src/
@@ -28,8 +29,11 @@ LarkReport/
 │       │   ├── fetchZaim.js          # Zaim API から収支取得        ✅ PR-15
 │       │   ├── fetchCalendar.js      # Google Calendar から予定取得 ✅ PR-16
 │       │   ├── generateMoneyHTML.js  # Tailwind HTML 生成           ✅ PR-18
-│       │   ├── main-money.js         # 日次収支レポート統合          ✅ PR-19
-│       │   └── slackModal.js         # 手動入力モーダル（後回し）    🔜 PR-17
+│       │   ├── googleSheets.js       # Google Sheets CRUD           🔜 PR-17A
+│       │   ├── modalViews.js         # Block Kit モーダル定義        🔜 PR-17C
+│       │   ├── sendReportWithButton.js # ボタン付きレポート送信      🔜 PR-17C
+│       │   ├── slackModal.js         # Socket Mode Bolt アプリ      🔜 PR-17C
+│       │   └── main-money.js         # 日次収支レポート統合          ✅ PR-19（PR-17B で変更）
 │       └── mock/
 │           └── money.html            # デザイン確認用モックアップ    ✅ PR-18
 └── shared/
@@ -45,10 +49,12 @@ LarkReport/
 |-----|---------|------|------|
 | PR-15 | fetchZaim.js 実装 | Zaim API から収支取得（OAuth 1.0a） | ✅ マージ済み |
 | PR-16 | fetchCalendar.js 実装 | Google Calendar から予定取得 | ✅ マージ済み |
-| PR-17 | slackModal.js 実装 | Slack 手動入力モーダル | 🔜 後回し |
+| PR-17A | googleSheets.js 実装 | Google Sheets CRUD（収支・futureExpenses） | 🔜 **次にやること** |
+| PR-17B | main-money.js 変更 | futureExpenses を Sheets から取得して統合 | 🔜 PR-17A 完了後 |
+| PR-17C | slackModal.js 実装 | Slack Socket Mode モーダル + ボタン送信 | 🔜 PR-17B 完了後 |
 | PR-18 | generateMoneyHTML.js 実装 | Tailwind HTML 生成 | ✅ マージ済み |
 | PR-19 | main-money.js 実装 | 日次収支レポート E2E 統合 | ✅ マージ済み |
-| PR-20 | money-report.yml 実装 | GitHub Actions 毎日 23:00 JST 自動実行 | 🔜 **次にやること** |
+| PR-20 | money-report.yml 実装 | GitHub Actions 毎日 23:00 JST 自動実行 | ✅ マージ済み |
 
 ---
 
@@ -56,44 +62,68 @@ LarkReport/
 
 ---
 
-### PR-20: `.github/workflows/money-report.yml`
+### PR-17A: `apps/Zeny/src/googleSheets.js`
 
-**目的**: 毎日 23:00 JST に収支レポートを自動実行して Slack に送信する。
+**目的**: Google Sheets API の CRUD ラッパー。収支の手動入力と futureExpenses の保存・取得を担う。
 
-**トリガー**:
-- `schedule`: `cron: '0 14 * * *'`（UTC 14:00 = JST 23:00）
-- `workflow_dispatch`: 手動実行（テスト用）
+**実装する関数**:
+- `initSpreadsheet()` — 初回のみ実行。「Zeny Data」スプレッドシートを新規作成し ID を返す
+- `appendManualEntry(entry)` — 収支手動入力を「収支手動入力」シートに追記
+- `appendFutureExpense(item)` — 支出予定を「futureExpenses」シートに追記
+- `fetchFutureExpenses()` — 「futureExpenses」シートから全行を取得して配列で返す
 
-**ジョブ構成**（`morning-report.yml` と同じ構成）:
-1. リポジトリをチェックアウト（`actions/checkout@v4`）
-2. Node.js セットアップ（`actions/setup-node@v4`、バージョン 20、npm キャッシュ有効）
-3. 依存パッケージをインストール（`npm ci`）
-4. Playwright (Chromium) をインストール（`npx playwright install --with-deps chromium`、`working-directory: apps/Zeny`）
-5. 収支レポートを実行（`node apps/Zeny/src/main-money.js`）
+**Google スプレッドシート構成**:
 
-**必要な GitHub Secrets**:
+シート1「収支手動入力」: `date | type | category | amount | method | comment | created_at`
+シート2「futureExpenses」: `label | year | month | amount | created_at`
+
+**必要な環境変数**:
 ```
-ZAIM_CLIENT_ID
-ZAIM_CLIENT_SECRET
-ZAIM_ACCESS_TOKEN
-ZAIM_ACCESS_TOKEN_SECRET
-GEMINI_API_KEY
-SLACK_BOT_TOKEN
-SLACK_CHANNEL_ID
+GOOGLE_CLIENT_ID=        # 既存
+GOOGLE_CLIENT_SECRET=    # 既存
+GOOGLE_REFRESH_TOKEN=    # 既存（spreadsheets スコープが必要）
+ZENY_SPREADSHEET_ID=     # initSpreadsheet() 実行後に取得して設定
 ```
 
 **完了条件**:
-- [ ] `workflow_dispatch` で手動実行して Actions が成功する
-- [ ] Slack に PNG レポートが届く
-- [ ] cron スケジュール（JST 換算）が本文コメントに記載されている
+- [ ] `node apps/Zeny/src/googleSheets.js` で initSpreadsheet → append → fetch が成功する
+- [ ] Google Sheets にデータが記録されていることを目視確認できる
 
 ---
 
-### PR-17: `apps/Zeny/src/slackModal.js`（後回し）
+### PR-17B: `apps/Zeny/src/main-money.js` 変更
 
-**目的**: Slack のモーダルから手動で収支を入力できる機能。
+**目的**: `fetchFutureExpenses()` を呼んで Sheets から futureExpenses を取得し、レポートに反映する。
 
-> ⚠️ 現時点では後回し。PR-20 完了後に着手する。
+**変更内容（2箇所のみ）**:
+1. `fetchFutureExpenses()` を import して `opts.futureExpenses` に渡す
+2. 既存の `sendToSlack` はそのまま維持（ボタン追加は PR-17C）
+
+**完了条件**:
+- [ ] `npm run money` を実行して Sheets の futureExpenses がレポートに表示される
+
+---
+
+### PR-17C: Slack モーダル本体
+
+**目的**: `/zeny` スラッシュコマンドとボタンでモーダルを開き、収支・futureExpenses を入力して Sheets に保存する。
+
+**実装ファイル**:
+- `apps/Zeny/src/modalViews.js` — Block Kit モーダル定義
+- `apps/Zeny/src/slackModal.js` — Socket Mode Bolt アプリ本体
+- `apps/Zeny/src/sendReportWithButton.js` — ボタン付きレポート送信
+- `.github/workflows/slack-modal.yml` — GitHub Actions ワークフロー
+- `package.json` — `@slack/bolt` 追加
+
+**追加環境変数**:
+```
+SLACK_APP_TOKEN=xapp-...      # Socket Mode 用 App-Level Token
+SLACK_SIGNING_SECRET=         # Slack App の Signing Secret
+```
+
+---
+
+### PR-20: `.github/workflows/money-report.yml` ✅ マージ済み
 
 ---
 
@@ -109,14 +139,19 @@ ZAIM_ACCESS_TOKEN_SECRET=
 # Gemini API（https://aistudio.google.com/app/apikey で取得）
 GEMINI_API_KEY=AIza...
 
-# Slack（Bot Token スコープ: files:write, chat:write）
+# Slack Bot Token（スコープ: files:write, chat:write, commands）
 SLACK_BOT_TOKEN=xoxb-...
 SLACK_CHANNEL_ID=C...
+SLACK_APP_TOKEN=xapp-...      # PR-17C〜 Socket Mode 用 App-Level Token
+SLACK_SIGNING_SECRET=         # PR-17C〜 Slack App の Signing Secret
 
-# Google Calendar（fetchCalendar.js で使用）
+# Google API（Calendar / Sheets 共通）
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
-GOOGLE_REFRESH_TOKEN=
+GOOGLE_REFRESH_TOKEN=         # spreadsheets スコープが必要（PR-17A〜）
+
+# Google Sheets（PR-17A〜）
+ZENY_SPREADSHEET_ID=          # initSpreadsheet() 実行後に設定
 ```
 
 ---
@@ -137,7 +172,7 @@ GOOGLE_REFRESH_TOKEN=
 
 | opts フィールド | 将来のデータソース |
 |---|---|
-| `futureExpenses` | Google スプレッドシート（手動メンテ） |
+| `futureExpenses` | Google スプレッドシート「futureExpenses」シート（PR-17A〜） |
 | `monthlyExpenses` | Zaim API（月次集計） |
 | `monthlyTotalIncome` | Zaim API（月次集計） |
 | `monthlyTotalExpense` | Zaim API（月次集計） |
