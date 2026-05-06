@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>LarkReport Money & Time</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+    }
+  </style>
+</head>
+
+<body class="bg-gradient-to-br from-emerald-50 to-teal-100 py-10">
+
+  <div class="w-[800px] mx-auto">
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-center py-6 rounded-2xl shadow-md mb-6 text-xl font-bold">
+      2026年5月2日 土曜日
+    </div>
+
+    <!-- 💴 今日の収支 -->
+    <div class="mb-6">
+
+      <div class="text-lg font-bold mb-3">💴 今日の収支</div>
+
+      <!-- Summary -->
+      <div class="grid grid-cols-3 gap-4 mb-4">
+        <div class="bg-white rounded-2xl shadow-md p-4 text-center">
+          <div class="text-sm text-gray-500">収入</div>
+          <div class="text-xl font-bold text-green-600" id="totalIncome">¥0</div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-md p-4 text-center">
+          <div class="text-sm text-gray-500">支出</div>
+          <div class="text-xl font-bold text-red-500" id="totalExpense">¥0</div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-md p-4 text-center">
+          <div class="text-sm text-gray-500">差引</div>
+          <div class="text-xl font-bold" id="totalBalance">¥0</div>
+        </div>
+      </div>
+
+      <!-- 収入テーブル -->
+      <div class="bg-white rounded-2xl shadow-md p-4 mb-4">
+        <div class="text-sm font-bold text-green-600 mb-2">📥 収入</div>
+        <table class="w-full text-sm">
+          <thead class="text-gray-500 border-b">
+            <tr>
+              <th class="text-left py-2">カテゴリ</th>
+              <th class="text-left py-2">支払い方法</th>
+              <th class="text-right py-2">金額</th>
+            </tr>
+          </thead>
+          <tbody id="incomeTable"></tbody>
+        </table>
+      </div>
+
+      <!-- 支出テーブル -->
+      <div class="bg-white rounded-2xl shadow-md p-4">
+        <div class="text-sm font-bold text-red-500 mb-2">📤 支出</div>
+        <table class="w-full text-sm">
+          <thead class="text-gray-500 border-b">
+            <tr>
+              <th class="text-left py-2">カテゴリ</th>
+              <th class="text-left py-2">支払い方法</th>
+              <th class="text-right py-2">金額</th>
+            </tr>
+          </thead>
+          <tbody id="expenseTable"></tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- 📅 今後の支出予定 -->
+    <div class="mb-6">
+
+      <div class="text-lg font-bold mb-3">📅 今後の支出予定</div>
+
+      <div class="bg-white rounded-2xl shadow-md p-4">
+        <table class="w-full text-sm mb-3">
+          <thead class="text-gray-500 border-b">
+            <tr>
+              <th class="text-left py-2">内容</th>
+              <th class="text-left py-2">予定時期</th>
+              <th class="text-right py-2">予定金額</th>
+            </tr>
+          </thead>
+          <tbody id="futureExpenseTable"></tbody>
+        </table>
+        <div class="text-right font-bold text-lg" id="futureTotalLabel"></div>
+      </div>
+
+    </div>
+
+    <!-- 📊 今月の累計 -->
+    <div class="mb-6">
+
+      <div class="text-lg font-bold mb-3">📊 今月の累計</div>
+
+      <div class="grid grid-cols-2 gap-4 mb-4">
+        <div class="bg-white rounded-2xl shadow-md p-4 text-center">
+          <div class="text-sm text-gray-500">支出</div>
+          <div class="text-xl font-bold text-red-500">¥63,900</div>
+        </div>
+        <div class="bg-white rounded-2xl shadow-md p-4 text-center">
+          <div class="text-sm text-gray-500">収入</div>
+          <div class="text-xl font-bold text-green-600">¥410,000</div>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-md p-4 space-y-4" id="monthlyBars"></div>
+
+    </div>
+
+    <!-- 🤖 AI アドバイス -->
+    <div class="mb-6">
+
+      <div class="text-lg font-bold mb-3">🤖 AI からのアドバイス</div>
+
+      <div class="bg-emerald-50 rounded-2xl shadow-md p-5 flex gap-4 items-start">
+        <div class="text-3xl">🤖</div>
+        <div class="text-sm leading-relaxed text-gray-700">
+          今日は食費・交通費ともに平均的な支出でした👍<br>
+          来月の引越し費用に備えて、今月の娯楽費を<br>
+          ¥3,000 ほど抑えると安心です。<br>
+          引き続き収支プラスをキープしていきましょう！
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    /* ── バッジ ── */
+    const badgeMap = {
+      "JCBカード":    "bg-blue-100 text-blue-700",
+      "PayPayカード": "bg-red-100 text-red-600",
+      "現金":         "bg-gray-200 text-gray-700",
+      "振込":         "bg-green-100 text-green-700"
+    };
+    function getBadgeClass(type) {
+      return badgeMap[type] || "bg-yellow-100 text-yellow-700";
+    }
+    function fmtYen(n) {
+      return "¥" + n.toLocaleString();
+    }
+
+    /* ── 収支データ ── */
+    const incomeData = [
+      { category: "💻 エンジニア収入", method: "振込",  amount: 350000 },
+      { category: "📷 カメラマン収入", method: "現金",  amount: 30000  }
+    ];
+    const expenseData = [
+      { category: "🍜 食費",   method: "PayPayカード", amount: 1200 },
+      { category: "🚃 交通費", method: "JCBカード",    amount: 560  },
+      { category: "☕ カフェ", method: "現金",          amount: 650  }
+    ];
+
+    function renderTable(tbodyId, rows) {
+      const tbody = document.getElementById(tbodyId);
+      rows.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.className = "border-b";
+        tr.innerHTML = `
+          <td class="py-2">${item.category}</td>
+          <td class="py-2">
+            <span class="px-2 py-1 rounded-full text-xs font-semibold ${getBadgeClass(item.method)}">
+              ${item.method}
+            </span>
+          </td>
+          <td class="py-2 text-right font-medium">${fmtYen(item.amount)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    renderTable("incomeTable",  incomeData);
+    renderTable("expenseTable", expenseData);
+
+    /* ── サマリー集計 ── */
+    const totalIncome  = incomeData.reduce((s, r) => s + r.amount, 0);
+    const totalExpense = expenseData.reduce((s, r) => s + r.amount, 0);
+    const balance      = totalIncome - totalExpense;
+
+    document.getElementById("totalIncome").textContent  = fmtYen(totalIncome);
+    document.getElementById("totalExpense").textContent = fmtYen(totalExpense);
+    const balEl = document.getElementById("totalBalance");
+    balEl.textContent  = fmtYen(balance);
+    balEl.className   += balance >= 0 ? " text-green-600" : " text-red-500";
+
+    /* ── 今後の支出予定 ── */
+    const today = new Date();
+    const thisYM  = today.getFullYear() * 100 + (today.getMonth() + 1);
+    const nextYM  = today.getFullYear() * 100 + (today.getMonth() + 2);
+
+    const futureData = [
+      { label: "🦷 歯医者",    year: 2026, month: 5, amount: 20000  },
+      { label: "🏠 引越し費用", year: 2026, month: 6, amount: 300000 },
+      { label: "🛋️ 家具・家電", year: 2026, month: 6, amount: 150000 }
+    ];
+
+    futureData.sort((a, b) => (a.year * 100 + a.month) - (b.year * 100 + b.month));
+
+    const futureTbody = document.getElementById("futureExpenseTable");
+    let futureTotal = 0;
+
+    futureData.forEach(item => {
+      const ym = item.year * 100 + item.month;
+      const isHighlight = ym === thisYM || ym === nextYM;
+      const tr = document.createElement("tr");
+      tr.className = "border-b" + (isHighlight ? " bg-orange-50" : "");
+      const badgeCls = isHighlight
+        ? "bg-orange-100 text-orange-700"
+        : "bg-gray-100 text-gray-600";
+      tr.innerHTML = `
+        <td class="py-2">${item.label}</td>
+        <td class="py-2">
+          <span class="px-2 py-1 text-xs rounded-full ${badgeCls}">
+            ${item.year}年${item.month}月
+          </span>
+        </td>
+        <td class="py-2 text-right font-medium">${fmtYen(item.amount)}</td>
+      `;
+      futureTbody.appendChild(tr);
+      futureTotal += item.amount;
+    });
+
+    document.getElementById("futureTotalLabel").textContent =
+      "合計予定金額：" + fmtYen(futureTotal);
+
+    /* ── 今月の累計バー（動的幅） ── */
+    const monthlyData = [
+      { label: "🍜 食費",   amount: 32000, color: "bg-emerald-500" },
+      { label: "🚃 交通費", amount: 8400,  color: "bg-teal-500"    },
+      { label: "🛍️ 日用品", amount: 12000, color: "bg-emerald-400" },
+      { label: "☕ カフェ", amount: 6500,  color: "bg-teal-400"    },
+      { label: "🎮 娯楽",   amount: 5000,  color: "bg-emerald-300" }
+    ];
+
+    const maxAmount = Math.max(...monthlyData.map(d => d.amount));
+    const barsEl = document.getElementById("monthlyBars");
+
+    monthlyData.forEach(item => {
+      const pct = Math.round((item.amount / maxAmount) * 100);
+      const div = document.createElement("div");
+      div.innerHTML = `
+        <div class="flex justify-between text-sm mb-1">
+          <span>${item.label}</span><span>${fmtYen(item.amount)}</span>
+        </div>
+        <div class="bg-gray-200 h-3 rounded-full">
+          <div class="${item.color} h-3 rounded-full" style="width:${pct}%"></div>
+        </div>
+      `;
+      barsEl.appendChild(div);
+    });
+  </script>
+
+</body>
+</html>
