@@ -107,7 +107,12 @@ async function runMoneyReport() {
   }
 
   // 3. Google Sheets から futureExpenses を取得
-  const futureExpenses = await fetchFutureExpenses();
+  let futureExpenses;
+  try {
+    futureExpenses = await fetchFutureExpenses();
+  } catch (err) {
+    throw new Error(`Google Sheets からの支出予定の取得に失敗しました: ${err.message}`, { cause: err });
+  }
 
   // 4. HTML を生成
   const html = generateMoneyHTML(zaimResult, targetDate, {
