@@ -2,7 +2,7 @@
  * generateMoneyHTML.js
  *
  * Zaim（収支）データを受け取り、Tailwind CSS ベースの HTML 文字列を生成する。
- * デザインは apps/Zeny/mockups/mockup-money.html を参照。
+ * デザインは apps/Zeny/mock/money.html を参照。
  *
  * 引数:
  *   zaimResult  - fetchZaimEntries() の戻り値
@@ -11,6 +11,15 @@
  *
  * 戻り値: HTML 文字列
  */
+
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 /**
  * 支払い方法バッジのスタイルを返す
@@ -41,10 +50,10 @@ function buildTableRows(entries) {
     const badge = getBadgeClass(e.method);
     return `
           <tr class="border-b">
-            <td class="py-2">${e.category}</td>
+            <td class="py-2">${escapeHtml(e.category)}</td>
             <td class="py-2">
               <span class="px-2 py-1 rounded-full text-xs font-semibold ${badge}">
-                ${e.method}
+                ${escapeHtml(e.method)}
               </span>
             </td>
             <td class="py-2 text-right font-medium">${fmtYen(e.amount)}</td>
@@ -67,7 +76,7 @@ function buildFutureRows(futureData, todayYM) {
       : 'bg-gray-100 text-gray-600';
     return `
           <tr class="border-b${rowCls}">
-            <td class="py-2">${item.label}</td>
+            <td class="py-2">${escapeHtml(item.label)}</td>
             <td class="py-2">
               <span class="px-2 py-1 text-xs rounded-full ${badgeCls}">
                 ${item.year}年${item.month}月
@@ -87,11 +96,11 @@ function buildMonthlyBars(monthlyData) {
   const maxAmount = Math.max(...monthlyData.map(d => d.amount));
 
   return monthlyData.map(item => {
-    const pct = Math.round((item.amount / maxAmount) * 100);
+    const pct = maxAmount > 0 ? Math.round((item.amount / maxAmount) * 100) : 0;
     return `
         <div>
           <div class="flex justify-between text-sm mb-1">
-            <span>${item.label}</span><span>${fmtYen(item.amount)}</span>
+            <span>${escapeHtml(item.label)}</span><span>${fmtYen(item.amount)}</span>
           </div>
           <div class="bg-gray-200 h-3 rounded-full">
             <div class="${item.color} h-3 rounded-full" style="width:${pct}%"></div>
