@@ -50,9 +50,9 @@ LarkReport/
 |-----|---------|------|------|
 | PR-15 | fetchZaim.js 実装 | Zaim API から収支取得（OAuth 1.0a） | ✅ マージ済み |
 | PR-16 | fetchCalendar.js 実装 | Google Calendar から予定取得 | ✅ マージ済み |
-| PR-17A | googleSheets.js 実装 | Google Sheets CRUD（収支・futureExpenses） | 🔜 **次にやること** |
-| PR-17B | main-money.js 変更 | futureExpenses を Sheets から取得して統合 | 🔜 PR-17A 完了後 |
-| PR-17C | slackModal.js 実装 | Slack Socket Mode モーダル + ボタン送信 | 🔜 PR-17B 完了後 |
+| PR-17A | googleSheets.js 実装 | Google Sheets CRUD（収支・futureExpenses） | ✅ マージ済み |
+| PR-17B | main-money.js 変更 | futureExpenses を Sheets から取得して統合 | ✅ マージ済み |
+| PR-17C | slackModal.js 実装 | Slack Socket Mode モーダル + ボタン送信 | 🔜 **次にやること** |
 | PR-17D | postZaim.js 実装 | Slack モーダルの手動入力を Zaim にも書き込み | 🔜 PR-17C 完了後 |
 | PR-18 | generateMoneyHTML.js 実装 | Tailwind HTML 生成 | ✅ マージ済み |
 | PR-19 | main-money.js 実装 | 日次収支レポート E2E 統合 | ✅ マージ済み |

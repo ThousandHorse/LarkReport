@@ -1,0 +1,40 @@
+name: Zeny Slack モーダル
+
+# ⚠️ 運用上の注意:
+# Socket Mode の Bolt アプリは常駐プロセスが必要なため、GitHub Actions での長期稼働には適していない。
+# GitHub Actions のジョブはタイムアウト（デフォルト 6 時間）で終了し、プロセスも停止する。
+# 本番運用では以下のいずれかを推奨:
+#   - ローカルマシンで常時起動: npm run zeny-modal
+#   - VPS / Railway / Render 等の常駐サービスにデプロイ
+# このワークフローは動作確認・一時的な起動用途に限定して使用すること。
+
+on:
+  workflow_dispatch:  # 手動起動のみ
+
+jobs:
+  slack-modal:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Node.js セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 依存パッケージをインストール
+        run: npm ci
+
+      - name: Zeny Slack モーダルアプリを起動
+        run: node apps/Zeny/src/slackModal.js
+        env:
+          SLACK_BOT_TOKEN:      ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_APP_TOKEN:      ${{ secrets.SLACK_APP_TOKEN }}
+          SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }}
+          GOOGLE_CLIENT_ID:     ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          ZENY_SPREADSHEET_ID:  ${{ secrets.ZENY_SPREADSHEET_ID }}
