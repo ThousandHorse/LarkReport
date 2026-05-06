@@ -6,11 +6,13 @@
   "scripts": {
     "morning": "node apps/Daily/src/main-morning.js",
     "evening": "node apps/Daily/src/main-evening.js",
-    "money": "node apps/Zeny/src/main-money.js"
+    "money": "node apps/Zeny/src/main-money.js",
+    "zeny-modal": "node apps/Zeny/src/slackModal.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
     "@playwright/test": "^1.44.0",
+    "@slack/bolt": "^4.7.2",
     "@slack/web-api": "^7.15.1",
     "dotenv": "^16.0.0",
     "googleapis": "^171.4.0",

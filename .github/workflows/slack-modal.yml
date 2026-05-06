@@ -1,0 +1,32 @@
+name: Zeny Slack モーダル
+
+on:
+  workflow_dispatch:  # 手動起動のみ（Socket Mode は常駐プロセスのため schedule 不可）
+
+jobs:
+  slack-modal:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Node.js セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 依存パッケージをインストール
+        run: npm ci
+
+      - name: Zeny Slack モーダルアプリを起動
+        run: node apps/Zeny/src/slackModal.js
+        env:
+          SLACK_BOT_TOKEN:      ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_APP_TOKEN:      ${{ secrets.SLACK_APP_TOKEN }}
+          SLACK_SIGNING_SECRET: ${{ secrets.SLACK_SIGNING_SECRET }}
+          GOOGLE_CLIENT_ID:     ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_REFRESH_TOKEN: ${{ secrets.GOOGLE_REFRESH_TOKEN }}
+          ZENY_SPREADSHEET_ID:  ${{ secrets.ZENY_SPREADSHEET_ID }}

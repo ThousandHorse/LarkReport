@@ -11,7 +11,7 @@ import { fetchZaimEntries } from './fetchZaim.js';
 import { fetchFutureExpenses } from './googleSheets.js';
 import { generateMoneyHTML } from './generateMoneyHTML.js';
 import { htmlToPng } from '../../../shared/screenshot.js';
-import { sendToSlack } from '../../../shared/sendSlack.js';
+import { sendReportWithButton } from './sendReportWithButton.js';
 
 if (!process.env.GEMINI_API_KEY) {
   throw new Error('環境変数 GEMINI_API_KEY が設定されていません');
@@ -132,8 +132,8 @@ async function runMoneyReport() {
     timeZone: 'Asia/Tokyo',
   }).format(targetDate).replace(/\((.+?)\)/, '（$1）');
 
-  // 7. Slack に送信
-  await sendToSlack(png, 'money-report.png', `💴 ${date} 収支レポートが届きました！`);
+  // 7. Slack にボタン付きで送信
+  await sendReportWithButton(png, date);
 
   console.log('✅ 収支レポートを Slack に送信しました');
 }
