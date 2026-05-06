@@ -1,0 +1,37 @@
+name: 日次収支レポート
+
+on:
+  schedule:
+    - cron: '0 14 * * *'  # 毎日 UTC 14:00 = JST 23:00
+  workflow_dispatch:       # 手動実行（テスト用）
+
+jobs:
+  send-money-report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: リポジトリをチェックアウト
+        uses: actions/checkout@v4
+
+      - name: Node.js セットアップ
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 依存パッケージをインストール
+        run: npm ci
+
+      - name: Playwright (Chromium) をインストール
+        run: npx playwright install --with-deps chromium
+
+      - name: 収支レポートを実行して Slack に送信
+        run: npm run money
+        env:
+          ZAIM_CLIENT_ID: ${{ secrets.ZAIM_CLIENT_ID }}
+          ZAIM_CLIENT_SECRET: ${{ secrets.ZAIM_CLIENT_SECRET }}
+          ZAIM_ACCESS_TOKEN: ${{ secrets.ZAIM_ACCESS_TOKEN }}
+          ZAIM_ACCESS_TOKEN_SECRET: ${{ secrets.ZAIM_ACCESS_TOKEN_SECRET }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
