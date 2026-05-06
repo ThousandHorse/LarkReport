@@ -3,15 +3,12 @@
  *
  * Zeny の日次収支レポートを生成して Slack に送信するメインスクリプト。
  * fetchZaimEntries → AI アドバイス生成 → generateMoneyHTML → htmlToPng → sendToSlack の順に実行する。
- *
- * 注意事項:
- *   opts.futureExpenses / monthlyExpenses は将来的に Google Sheets 等から取得する想定のため、
- *   現時点では空配列・0 を渡す。
  */
 
 import './env.js';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { fetchZaimEntries } from './fetchZaim.js';
+import { fetchFutureExpenses } from './googleSheets.js';
 import { generateMoneyHTML } from './generateMoneyHTML.js';
 import { htmlToPng } from '../../../shared/screenshot.js';
 import { sendToSlack } from '../../../shared/sendSlack.js';
@@ -109,25 +106,33 @@ async function runMoneyReport() {
     }
   }
 
-  // 3. HTML を生成
+  // 3. Google Sheets から futureExpenses を取得
+  let futureExpenses;
+  try {
+    futureExpenses = await fetchFutureExpenses();
+  } catch (err) {
+    throw new Error(`Google Sheets からの支出予定の取得に失敗しました: ${err.message}`, { cause: err });
+  }
+
+  // 4. HTML を生成
   const html = generateMoneyHTML(zaimResult, targetDate, {
-    futureExpenses: [],
+    futureExpenses,
     monthlyExpenses: [],
     monthlyTotalIncome: 0,
     monthlyTotalExpense: 0,
     aiAdvice,
   });
 
-  // 4. HTML → PNG に変換
+  // 5. HTML → PNG に変換
   const png = await htmlToPng(html);
 
-  // 5. JST 日付文字列を生成（例: 2026/05/06（水））
+  // 6. JST 日付文字列を生成（例: 2026/05/06（水））
   const date = new Intl.DateTimeFormat('ja-JP', {
     year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short',
     timeZone: 'Asia/Tokyo',
   }).format(targetDate).replace(/\((.+?)\)/, '（$1）');
 
-  // 6. Slack に送信
+  // 7. Slack に送信
   await sendToSlack(png, 'money-report.png', `💴 ${date} 収支レポートが届きました！`);
 
   console.log('✅ 収支レポートを Slack に送信しました');

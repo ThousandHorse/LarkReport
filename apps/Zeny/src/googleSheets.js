@@ -169,7 +169,8 @@ export async function fetchFutureExpenses() {
   return (rows || [])
     .filter(row => row.length >= 4)
     .map(([label, year, month, amount]) => ({
-      label:  escapeHtml(label),
+      // label のエスケープは呼び出し側（generateMoneyHTML.js）で行うため、ここでは生文字列のまま渡す
+      label:  String(label),
       year:   Number(year),
       month:  Number(month),
       amount: Number(amount),
