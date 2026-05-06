@@ -18,6 +18,7 @@
 import './env.js';
 import { App } from '@slack/bolt';
 import { appendManualEntry, appendFutureExpense } from './googleSheets.js';
+import { postZaimPayment, postZaimIncome } from './postZaim.js';
 import { manualEntryView, futureExpenseView } from './modalViews.js';
 
 // 環境変数チェック
@@ -97,8 +98,13 @@ app.view('manual_entry_submit', async ({ ack, view, logger }) => {
   };
 
   try {
-    await appendManualEntry(entry);
-    logger.info(`✅ 収支を保存しました: ${JSON.stringify(entry)}`);
+    // Google Sheets と Zaim に並列保存
+    const postZaim = entry.type === 'payment' ? postZaimPayment : postZaimIncome;
+    await Promise.all([
+      appendManualEntry(entry),
+      postZaim({ ...entry, name: entry.category }),
+    ]);
+    logger.info(`✅ 収支を保存しました（Sheets + Zaim）: ${JSON.stringify(entry)}`);
   } catch (err) {
     logger.error('収支保存エラー:', err);
   }
