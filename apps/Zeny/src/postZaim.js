@@ -18,8 +18,9 @@ import crypto from 'crypto';
 
 const ZAIM_API_BASE = 'https://api.zaim.net/v2';
 
-// カテゴリ一覧のインメモリキャッシュ（プロセス起動中は再取得しない）
+// カテゴリ・ジャンル一覧のインメモリキャッシュ（プロセス起動中は再取得しない）
 let categoryCache = null;
+let genreCache    = null;
 
 /**
  * OAuth 1.0a クライアントを生成する（fetchZaim.js と同じパターン）
@@ -141,19 +142,51 @@ export async function fetchZaimCategories() {
 }
 
 /**
- * カテゴリ名から Zaim カテゴリ ID を検索する。
- * 一致しない場合は null を返す。
+ * Zaim のジャンル一覧を取得してキャッシュする。
+ * genre は category のサブカテゴリで、POST API に必須。
+ *
+ * @returns {Promise<Array<{ id: number, categoryId: number, name: string, sort: number }>>}
+ */
+async function fetchZaimGenres() {
+  if (genreCache) return genreCache;
+
+  const data = await zaimGet(`${ZAIM_API_BASE}/home/genre`);
+  genreCache = (data.genres ?? []).map(g => ({
+    id:         g.id,
+    categoryId: g.category_id,
+    name:       g.name,
+    sort:       g.sort,
+  }));
+
+  return genreCache;
+}
+
+/**
+ * カテゴリ名から Zaim カテゴリ ID とジャンル ID を解決する。
+ * カテゴリが見つからない場合は null を返す。
+ * ジャンルはカテゴリ内の sort=1（先頭）のものを使用する。
  *
  * @param {string} categoryName - カテゴリ名（例: "食費"）
  * @param {'payment'|'income'} mode
- * @returns {Promise<number|null>}
+ * @returns {Promise<{ categoryId: number, genreId: number } | null>}
  */
-async function resolveCategoryId(categoryName, mode) {
-  const categories = await fetchZaimCategories();
-  const matched = categories.find(
-    c => c.mode === mode && c.name === categoryName
-  );
-  return matched?.id ?? null;
+async function resolveCategoryAndGenre(categoryName, mode) {
+  const [categories, genres] = await Promise.all([
+    fetchZaimCategories(),
+    fetchZaimGenres(),
+  ]);
+
+  const category = categories.find(c => c.mode === mode && c.name === categoryName);
+  if (!category) return null;
+
+  // カテゴリに属するジャンルのうち sort が最小（先頭）のものを使用
+  const genre = genres
+    .filter(g => g.categoryId === category.id)
+    .sort((a, b) => a.sort - b.sort)[0];
+
+  if (!genre) return null;
+
+  return { categoryId: category.id, genreId: genre.id };
 }
 
 /**
@@ -171,16 +204,19 @@ async function resolveCategoryId(categoryName, mode) {
 export async function postZaimPayment(entry) {
   const { date, category, amount, name = '', comment = '' } = entry;
 
-  // カテゴリ名 → ID（見つからなければ未分類として category_id を省略）
-  const categoryId = await resolveCategoryId(category, 'payment');
+  // カテゴリ名 → category_id + genre_id（必須）
+  // 見つからない場合は食費カテゴリの先頭ジャンルにフォールバック
+  const resolved = await resolveCategoryAndGenre(category, 'payment');
 
   const params = {
-    mapping:  '1',
     date,
     amount:   String(amount),
     name,
     comment,
-    ...(categoryId !== null && { category_id: String(categoryId) }),
+    ...(resolved !== null
+      ? { category_id: String(resolved.categoryId), genre_id: String(resolved.genreId) }
+      : {}
+    ),
   };
 
   try {
@@ -206,15 +242,19 @@ export async function postZaimPayment(entry) {
 export async function postZaimIncome(entry) {
   const { date, category, amount, name = '', comment = '' } = entry;
 
-  const categoryId = await resolveCategoryId(category, 'income');
+  // 収入は genre_id 不要（income API は category_id のみで登録可能）
+  const categories = await fetchZaimCategories();
+  const matched = categories.find(c => c.mode === 'income' && c.name === category);
 
   const params = {
-    mapping:  '1',
     date,
     amount:   String(amount),
     name,
     comment,
-    ...(categoryId !== null && { category_id: String(categoryId) }),
+    ...(matched !== null && matched !== undefined
+      ? { category_id: String(matched.id) }
+      : {}
+    ),
   };
 
   try {
