@@ -16,6 +16,20 @@
 import './env.js';
 import { google } from 'googleapis';
 
+/**
+ * HTML 特殊文字をエスケープする（XSS 対策）
+ * @param {string} str
+ * @returns {string}
+ */
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // OAuth2 クライアントを生成する（fetchCalendar.js と同じパターン）
 function createAuth() {
   const auth = new google.auth.OAuth2(
@@ -147,17 +161,24 @@ export async function fetchFutureExpenses() {
     spreadsheetId,
     // 2行目以降（1行目はヘッダー）を取得
     range: `${SHEET_FUTURE}!A2:D`,
+    // 書式付き数値（例: "20,000"）を避け、生の数値文字列を取得する
+    valueRenderOption: 'UNFORMATTED_VALUE',
   });
 
   const rows = res.data.values ?? [];
-  return rows
+  return (rows || [])
     .filter(row => row.length >= 4)
     .map(([label, year, month, amount]) => ({
-      label,
+      label:  escapeHtml(label),
       year:   Number(year),
       month:  Number(month),
       amount: Number(amount),
-    }));
+    }))
+    .filter(item =>
+      !Number.isNaN(item.year) &&
+      !Number.isNaN(item.month) &&
+      !Number.isNaN(item.amount)
+    );
 }
 
 // 単体実行: node apps/Zeny/src/googleSheets.js

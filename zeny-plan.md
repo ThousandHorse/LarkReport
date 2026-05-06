@@ -31,6 +31,7 @@ LarkReport/
 │       │   ├── generateMoneyHTML.js  # Tailwind HTML 生成           ✅ PR-18
 │       │   ├── googleSheets.js       # Google Sheets CRUD           🔜 PR-17A
 │       │   ├── modalViews.js         # Block Kit モーダル定義        🔜 PR-17C
+│       │   ├── postZaim.js           # Zaim への書き込み             🔜 PR-17D
 │       │   ├── sendReportWithButton.js # ボタン付きレポート送信      🔜 PR-17C
 │       │   ├── slackModal.js         # Socket Mode Bolt アプリ      🔜 PR-17C
 │       │   └── main-money.js         # 日次収支レポート統合          ✅ PR-19（PR-17B で変更）
@@ -52,6 +53,7 @@ LarkReport/
 | PR-17A | googleSheets.js 実装 | Google Sheets CRUD（収支・futureExpenses） | 🔜 **次にやること** |
 | PR-17B | main-money.js 変更 | futureExpenses を Sheets から取得して統合 | 🔜 PR-17A 完了後 |
 | PR-17C | slackModal.js 実装 | Slack Socket Mode モーダル + ボタン送信 | 🔜 PR-17B 完了後 |
+| PR-17D | postZaim.js 実装 | Slack モーダルの手動入力を Zaim にも書き込み | 🔜 PR-17C 完了後 |
 | PR-18 | generateMoneyHTML.js 実装 | Tailwind HTML 生成 | ✅ マージ済み |
 | PR-19 | main-money.js 実装 | 日次収支レポート E2E 統合 | ✅ マージ済み |
 | PR-20 | money-report.yml 実装 | GitHub Actions 毎日 23:00 JST 自動実行 | ✅ マージ済み |
@@ -124,6 +126,54 @@ SLACK_SIGNING_SECRET=         # Slack App の Signing Secret
 ---
 
 ### PR-20: `.github/workflows/money-report.yml` ✅ マージ済み
+
+---
+
+### PR-17D: `apps/Zeny/src/postZaim.js`
+
+**目的**: Slack モーダルから手動入力した収支データを Zaim API に書き込む。PR-17C の `slackModal.js` から呼び出すことで、Sheets への保存（PR-17A）と Zaim への書き込みを同時に行う。
+
+**実装する関数**:
+- `postZaimPayment(entry)` — 支出を Zaim に登録する
+- `postZaimIncome(entry)` — 収入を Zaim に登録する
+- `fetchZaimCategories()` — Zaim のカテゴリ一覧を取得してキャッシュする
+
+**Zaim API エンドポイント**:
+```
+POST https://api.zaim.net/v2/home/money/payment  # 支出登録
+POST https://api.zaim.net/v2/home/money/income   # 収入登録
+GET  https://api.zaim.net/v2/home/category       # カテゴリ一覧取得
+```
+
+**引数スキーマ（appendManualEntry と同形式）**:
+```js
+// postZaimPayment / postZaimIncome 共通
+{
+  date:     string,              // "YYYY-MM-DD"
+  amount:   number,              // 金額（正の整数）
+  category: string,              // カテゴリ名（例: "食費"）→ ID に変換
+  name:     string,              // 品目名（Zaim の "name" フィールド）
+  comment?: string,              // メモ（省略可）
+}
+```
+
+**カテゴリ名 → ID 変換**:
+- `fetchZaimCategories()` で取得したカテゴリ一覧から `name` で検索して `id` を返す
+- 一致するカテゴリが見つからない場合は「その他」カテゴリ ID にフォールバック
+
+**PR-17C との連携**:
+`slackModal.js` のモーダル送信ハンドラ内で以下を並列実行:
+```js
+await Promise.all([
+  appendManualEntry(entry),           // Google Sheets に保存（PR-17A）
+  postZaimPayment(entry),             // Zaim に書き込み（PR-17D）
+]);
+```
+
+**完了条件**:
+- [ ] Slack モーダルから支出を入力すると Zaim アプリに反映される
+- [ ] Slack モーダルから収入を入力すると Zaim アプリに反映される
+- [ ] カテゴリ名が Zaim に存在しない場合でもエラーにならず「その他」に記録される
 
 ---
 
