@@ -7,7 +7,8 @@
     "morning": "node apps/Daily/src/main-morning.js",
     "evening": "node apps/Daily/src/main-evening.js",
     "money": "node apps/Zeny/src/main-money.js",
-    "zeny-modal": "node apps/Zeny/src/slackModal.js"
+    "zeny-modal": "node apps/Zeny/src/slackModal.js",
+    "start": "npm run zeny-modal"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",
