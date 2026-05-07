@@ -22,6 +22,7 @@
  */
 
 import './env.js';
+import http from 'http';
 import { App } from '@slack/bolt';
 import { appendManualEntry, appendFutureExpense } from './googleSheets.js';
 import { postZaimPayment, postZaimIncome } from './postZaim.js';
@@ -162,14 +163,19 @@ app.view('future_expense_submit', async ({ ack, view, logger }) => {
 // ─────────────────────────────────────────
 // アプリ起動
 // ─────────────────────────────────────────
-// TODO: Railway / Render 等のクラウドサービスへのデプロイ対応（PR-17E）
-//   現状はローカルマシンで `npm run zeny-modal` を常時起動する運用。
-//   スマホからも常時利用できるよう、Railway または Render にデプロイして
-//   プロセスを常駐させる。必要な対応:
-//     1. Railway/Render のプロジェクト作成・環境変数設定
-//     2. Procfile または start スクリプトの追加
-//     3. GitHub リポジトリと連携して自動デプロイ設定
 (async () => {
   await app.start();
   console.log('✅ Zeny Slack モーダルアプリが起動しました（Socket Mode）');
+
+  // Render の Web Service はポートのリッスンが必要なためヘルスチェック用 HTTP サーバーを起動する
+  // ローカル実行時は PORT が未設定のため起動しない
+  const port = process.env.PORT;
+  if (port) {
+    http.createServer((_, res) => {
+      res.writeHead(200);
+      res.end('ok');
+    }).listen(port, () => {
+      console.log(`✅ ヘルスチェックサーバーを起動しました（port: ${port}）`);
+    });
+  }
 })();

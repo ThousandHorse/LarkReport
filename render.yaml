@@ -1,13 +1,17 @@
 services:
-  - type: worker          # HTTP サーバーではなくバックグラウンドワーカーとして起動
+  - type: web             # 無料プランで利用可能（worker は有料プランのみ）
     name: zeny-slack-modal
     runtime: node
     buildCommand: npm ci
     startCommand: npm run zeny-modal
-    plan: free            # 無料プラン
+    plan: free
+    # Render の Web Service はポートのリッスンが必要なため、
+    # slackModal.js 内でヘルスチェック用の HTTP サーバーを起動している
     envVars:
+      - key: PORT
+        value: 3000
       - key: SLACK_BOT_TOKEN
-        sync: false       # Render ダッシュボードで手動設定
+        sync: false
       - key: SLACK_APP_TOKEN
         sync: false
       - key: SLACK_SIGNING_SECRET

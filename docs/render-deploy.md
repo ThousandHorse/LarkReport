@@ -24,8 +24,11 @@
 
 1. ダッシュボードで「**New +**」→「**Blueprint**」を選択
 2. LarkReport リポジトリを選択
-3. `render.yaml` が自動検出され「zeny-slack-modal」サービスが表示される
+3. `render.yaml` が自動検出され「zeny-slack-modal」サービスが表示される（**Web Service**・無料プラン）
 4. 「**Apply**」をクリック
+
+> ⚠️ **Background Worker は有料プランのみ**のため、Web Service として起動します。  
+> Socket Mode は WebSocket 接続のため HTTP リクエストがなくてもスリープしません。
 
 ---
 
