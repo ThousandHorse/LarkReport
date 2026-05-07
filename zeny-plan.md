@@ -53,8 +53,8 @@ LarkReport/
 | PR-17A | googleSheets.js 実装 | Google Sheets CRUD（収支・futureExpenses） | ✅ マージ済み |
 | PR-17B | main-money.js 変更 | futureExpenses を Sheets から取得して統合 | ✅ マージ済み |
 | PR-17C | slackModal.js 実装 | Slack Socket Mode モーダル + ボタン送信 | ✅ マージ済み |
-| PR-17D | postZaim.js 実装 | Slack モーダルの手動入力を Zaim にも書き込み | 🔜 **次にやること** |
-| PR-17E | クラウドデプロイ | slackModal.js を Railway/Render に常駐デプロイ | 🔜 PR-17D 完了後 |
+| PR-17D | postZaim.js 実装 | Slack モーダルの手動入力を Zaim にも書き込み | ✅ マージ済み |
+| PR-17E | クラウドデプロイ | slackModal.js を Railway/Render に常駐デプロイ | 🔜 **次にやること** |
 | PR-18 | generateMoneyHTML.js 実装 | Tailwind HTML 生成 | ✅ マージ済み |
 | PR-19 | main-money.js 実装 | 日次収支レポート E2E 統合 | ✅ マージ済み |
 | PR-20 | money-report.yml 実装 | GitHub Actions 毎日 23:00 JST 自動実行 | ✅ マージ済み |
@@ -175,6 +175,42 @@ await Promise.all([
 - [ ] Slack モーダルから支出を入力すると Zaim アプリに反映される
 - [ ] Slack モーダルから収入を入力すると Zaim アプリに反映される
 - [ ] カテゴリ名が Zaim に存在しない場合でもエラーにならず「その他」に記録される
+
+---
+
+### PR-17E: Railway クラウドデプロイ
+
+**目的**: `slackModal.js` をクラウド（Railway）に常駐デプロイし、ローカル Mac を起動し続けなくてもスマホ含む任意のデバイスから `/zeny` コマンドとボタンが使えるようにする。
+
+**変更ファイル**:
+- `railway.toml` — Railway のビルド・起動設定
+- `package.json` — `start` スクリプト追加（Railway が自動実行）
+
+**デプロイ手順**:
+1. [railway.app](https://railway.app) でアカウント作成・ログイン
+2. 「New Project」→「Deploy from GitHub repo」→ LarkReport を選択
+3. 環境変数を Railway の Variables に設定（以下参照）
+4. デプロイ完了後、ログに「✅ Zeny Slack モーダルアプリが起動しました」が表示されることを確認
+
+**Railway に設定する環境変数**:
+```
+SLACK_BOT_TOKEN
+SLACK_APP_TOKEN
+SLACK_SIGNING_SECRET
+GOOGLE_CLIENT_ID
+GOOGLE_CLIENT_SECRET
+GOOGLE_REFRESH_TOKEN
+ZENY_SPREADSHEET_ID
+ZAIM_CLIENT_ID
+ZAIM_CLIENT_SECRET
+ZAIM_ACCESS_TOKEN
+ZAIM_ACCESS_TOKEN_SECRET
+```
+
+**完了条件**:
+- [ ] Railway のダッシュボードでサービスが Running 状態になる
+- [ ] スマホの Slack から `/zeny` を打つとモーダルが開く
+- [ ] ローカル Mac をシャットダウンしてもモーダルが動作する
 
 ---
 
