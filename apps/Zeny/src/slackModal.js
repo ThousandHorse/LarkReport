@@ -5,8 +5,14 @@
  * /zeny スラッシュコマンドとボタンアクションでモーダルを開き、
  * 送信されたデータを Google Sheets と Zaim に保存する。
  *
+ * モーダル遷移フロー:
+ *   /zeny or ボタン「収支を入力」
+ *     → typeSelectView（種別選択: 支出/収入）
+ *     → 支出: paymentEntryView / 収入: incomeEntryView
+ *     → 保存（Sheets + Zaim）
+ *
  * 起動方法:
- *   node apps/Zeny/src/slackModal.js
+ *   node apps/Zeny/src/slackModal.js  または  npm run zeny-modal
  *
  * 必要な環境変数:
  *   SLACK_BOT_TOKEN       — xoxb- で始まる Bot Token
@@ -19,7 +25,7 @@ import './env.js';
 import { App } from '@slack/bolt';
 import { appendManualEntry, appendFutureExpense } from './googleSheets.js';
 import { postZaimPayment, postZaimIncome } from './postZaim.js';
-import { manualEntryView, futureExpenseView } from './modalViews.js';
+import { typeSelectView, paymentEntryView, incomeEntryView, futureExpenseView } from './modalViews.js';
 
 // 環境変数チェック
 const requiredEnvVars = ['SLACK_BOT_TOKEN', 'SLACK_APP_TOKEN', 'SLACK_SIGNING_SECRET'];
@@ -37,14 +43,14 @@ const app = new App({
 });
 
 // ─────────────────────────────────────────
-// スラッシュコマンド: /zeny
+// スラッシュコマンド: /zeny → 種別選択モーダル
 // ─────────────────────────────────────────
 app.command('/zeny', async ({ ack, body, client, logger }) => {
   await ack();
   try {
     await client.views.open({
       trigger_id: body.trigger_id,
-      view: manualEntryView(),
+      view: typeSelectView(),
     });
   } catch (err) {
     logger.error('/zeny コマンドエラー:', err);
@@ -52,14 +58,14 @@ app.command('/zeny', async ({ ack, body, client, logger }) => {
 });
 
 // ─────────────────────────────────────────
-// ボタンアクション: 収支を入力
+// ボタンアクション: 収支を入力 → 種別選択モーダル
 // ─────────────────────────────────────────
 app.action('open_manual_entry', async ({ ack, body, client, logger }) => {
   await ack();
   try {
     await client.views.open({
       trigger_id: body.trigger_id,
-      view: manualEntryView(),
+      view: typeSelectView(),
     });
   } catch (err) {
     logger.error('open_manual_entry エラー:', err);
@@ -82,19 +88,34 @@ app.action('open_future_expense', async ({ ack, body, client, logger }) => {
 });
 
 // ─────────────────────────────────────────
-// モーダル送信: 収支手動入力
+// モーダル送信: 種別選択 → 支出/収入モーダルに遷移
+// ─────────────────────────────────────────
+app.view('type_select_submit', async ({ ack, view, client, logger }) => {
+  const type = view.state.values.type_block.type.selected_option.value;
+  const nextView = type === 'payment' ? paymentEntryView() : incomeEntryView();
+
+  // ack に view を渡すことでモーダルを次の画面に置き換える
+  await ack({ response_action: 'push', view: nextView });
+});
+
+// ─────────────────────────────────────────
+// モーダル送信: 支出/収入入力 → Sheets + Zaim に保存
 // ─────────────────────────────────────────
 app.view('manual_entry_submit', async ({ ack, view, logger }) => {
   await ack();
 
-  const v = view.state.values;
+  const v    = view.state.values;
+  const type = view.private_metadata; // 'payment' | 'income'
+
   const entry = {
     date:     v.date_block.date.selected_date,
-    type:     v.type_block.type.selected_option.value,
+    type,
     category: v.category_block.category.selected_option.value,
     amount:   Number(v.amount_block.amount.value),
-    method:   v.method_block.method.value,
-    comment:  v.comment_block.comment.value ?? '',
+    method:   type === 'payment'
+      ? v.method_block.method.selected_option.value
+      : '（収入）',
+    comment:  v.comment_block?.comment?.value ?? '',
   };
 
   // 1. Google Sheets に保存（確実に記録する）
@@ -108,7 +129,7 @@ app.view('manual_entry_submit', async ({ ack, view, logger }) => {
   // 2. Zaim に書き込み（ベストエフォート: 失敗しても Sheets の記録は残る）
   // TODO: method（支払方法）→ Zaim の from_account_id へのマッピングは将来対応
   try {
-    const postZaim = entry.type === 'payment' ? postZaimPayment : postZaimIncome;
+    const postZaim = type === 'payment' ? postZaimPayment : postZaimIncome;
     await postZaim({ ...entry, name: entry.category });
     logger.info(`✅ 収支を保存しました（Sheets + Zaim）: ${JSON.stringify(entry)}`);
   } catch (err) {
