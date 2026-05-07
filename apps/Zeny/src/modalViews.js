@@ -62,9 +62,35 @@ export function manualEntryView() {
         block_id: 'category_block',
         label: { type: 'plain_text', text: 'カテゴリ' },
         element: {
-          type: 'plain_text_input',
+          type: 'static_select',
           action_id: 'category',
-          placeholder: { type: 'plain_text', text: '例: 食費、交通費、給与' },
+          placeholder: { type: 'plain_text', text: 'カテゴリを選択' },
+          option_groups: [
+            {
+              label: { type: 'plain_text', text: '💸 支出' },
+              options: [
+                { text: { type: 'plain_text', text: '食費'       }, value: '食費'       },
+                { text: { type: 'plain_text', text: '日用雑貨'   }, value: '日用雑貨'   },
+                { text: { type: 'plain_text', text: '交通'       }, value: '交通'       },
+                { text: { type: 'plain_text', text: '交際費'     }, value: '交際費'     },
+                { text: { type: 'plain_text', text: 'エンタメ'   }, value: 'エンタメ'   },
+                { text: { type: 'plain_text', text: '衣服・美容' }, value: '衣服・美容' },
+                { text: { type: 'plain_text', text: '健康・医療' }, value: '健康・医療' },
+                { text: { type: 'plain_text', text: '住宅'       }, value: '住宅'       },
+                { text: { type: 'plain_text', text: 'その他'     }, value: 'その他'     },
+              ],
+            },
+            {
+              label: { type: 'plain_text', text: '💰 収入' },
+              options: [
+                { text: { type: 'plain_text', text: '給与所得'   }, value: '給与所得'   },
+                { text: { type: 'plain_text', text: '賞与'       }, value: '賞与'       },
+                { text: { type: 'plain_text', text: '事業所得'   }, value: '事業所得'   },
+                { text: { type: 'plain_text', text: '臨時収入'   }, value: '臨時収入'   },
+                { text: { type: 'plain_text', text: '立替金返済' }, value: '立替金返済' },
+              ],
+            },
+          ],
         },
       },
       {

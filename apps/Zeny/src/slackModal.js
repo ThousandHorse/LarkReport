@@ -91,22 +91,28 @@ app.view('manual_entry_submit', async ({ ack, view, logger }) => {
   const entry = {
     date:     v.date_block.date.selected_date,
     type:     v.type_block.type.selected_option.value,
-    category: v.category_block.category.value,
+    category: v.category_block.category.selected_option.value,
     amount:   Number(v.amount_block.amount.value),
     method:   v.method_block.method.value,
     comment:  v.comment_block.comment.value ?? '',
   };
 
+  // 1. Google Sheets に保存（確実に記録する）
   try {
-    // Google Sheets と Zaim に並列保存
+    await appendManualEntry(entry);
+  } catch (err) {
+    logger.error('Sheets 保存エラー:', err);
+    return; // Sheets が失敗した場合は Zaim も書かない（二重登録防止）
+  }
+
+  // 2. Zaim に書き込み（ベストエフォート: 失敗しても Sheets の記録は残る）
+  // TODO: method（支払方法）→ Zaim の from_account_id へのマッピングは将来対応
+  try {
     const postZaim = entry.type === 'payment' ? postZaimPayment : postZaimIncome;
-    await Promise.all([
-      appendManualEntry(entry),
-      postZaim({ ...entry, name: entry.category }),
-    ]);
+    await postZaim({ ...entry, name: entry.category });
     logger.info(`✅ 収支を保存しました（Sheets + Zaim）: ${JSON.stringify(entry)}`);
   } catch (err) {
-    logger.error('収支保存エラー:', err);
+    logger.error('Zaim 書き込みエラー（Sheets への保存は完了済み）:', err);
   }
 });
 

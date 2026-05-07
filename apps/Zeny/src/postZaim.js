@@ -176,7 +176,7 @@ async function resolveCategoryAndGenre(categoryName, mode) {
     fetchZaimGenres(),
   ]);
 
-  const category = categories.find(c => c.mode === mode && c.name === categoryName);
+  const category = categories.find(c => c.mode === mode && c.name === categoryName.trim());
   if (!category) return null;
 
   // カテゴリに属するジャンルのうち sort が最小（先頭）のものを使用
@@ -244,7 +244,7 @@ export async function postZaimIncome(entry) {
 
   // 収入は genre_id 不要（income API は category_id のみで登録可能）
   const categories = await fetchZaimCategories();
-  const matched = categories.find(c => c.mode === 'income' && c.name === category);
+  const matched = categories.find(c => c.mode === 'income' && c.name === category.trim());
 
   const params = {
     date,
