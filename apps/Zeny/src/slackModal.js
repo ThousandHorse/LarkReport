@@ -94,8 +94,8 @@ app.view('type_select_submit', async ({ ack, view, client, logger }) => {
   const type = view.state.values.type_block.type.selected_option.value;
   const nextView = type === 'payment' ? paymentEntryView() : incomeEntryView();
 
-  // ack に view を渡すことでモーダルを次の画面に置き換える
-  await ack({ response_action: 'push', view: nextView });
+  // ack に view を渡すことでモーダルを次の画面に更新する（push ではなく update で履歴を残さない）
+  await ack({ response_action: 'update', view: nextView });
 });
 
 // ─────────────────────────────────────────
