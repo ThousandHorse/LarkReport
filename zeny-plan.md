@@ -183,16 +183,16 @@ await Promise.all([
 **目的**: `slackModal.js` をクラウド（Railway）に常駐デプロイし、ローカル Mac を起動し続けなくてもスマホ含む任意のデバイスから `/zeny` コマンドとボタンが使えるようにする。
 
 **変更ファイル**:
-- `railway.toml` — Railway のビルド・起動設定
-- `package.json` — `start` スクリプト追加（Railway が自動実行）
+- `render.yaml` — Render のビルド・起動設定
+- `package.json` — `start` スクリプト追加（Render が自動実行）
 
 **デプロイ手順**:
-1. [railway.app](https://railway.app) でアカウント作成・ログイン
-2. 「New Project」→「Deploy from GitHub repo」→ LarkReport を選択
-3. 環境変数を Railway の Variables に設定（以下参照）
+1. [render.com](https://render.com) でアカウント作成・ログイン（GitHub 連携）
+2. 「New」→「Blueprint」→ LarkReport を選択（render.yaml を自動検出）
+3. 環境変数を Render の Environment に設定（以下参照）
 4. デプロイ完了後、ログに「✅ Zeny Slack モーダルアプリが起動しました」が表示されることを確認
 
-**Railway に設定する環境変数**:
+**Render に設定する環境変数**:
 ```
 SLACK_BOT_TOKEN
 SLACK_APP_TOKEN
@@ -208,7 +208,7 @@ ZAIM_ACCESS_TOKEN_SECRET
 ```
 
 **完了条件**:
-- [ ] Railway のダッシュボードでサービスが Running 状態になる
+- [ ] Render のダッシュボードでサービスが Running 状態になる
 - [ ] スマホの Slack から `/zeny` を打つとモーダルが開く
 - [ ] ローカル Mac をシャットダウンしてもモーダルが動作する
 
