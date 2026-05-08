@@ -165,11 +165,11 @@ export function generateMoneyHTML(zaimResult, targetDate = new Date(), opts = {}
     ? `合計予定金額：${fmtYen(futureTotal)}`
     : '';
 
-  // 今月の累計
-  const monthlyData         = opts.monthlyExpenses ?? [];
-  const monthlyTotalIncome  = opts.monthlyTotalIncome  ?? 0;
-  const monthlyTotalExpense = opts.monthlyTotalExpense ?? 0;
-  const monthlyBars         = buildMonthlyBars(monthlyData);
+  // TODO: 今月の累計（Zaim API 月次集計で実装予定）
+  // const monthlyData         = opts.monthlyExpenses ?? [];
+  // const monthlyTotalIncome  = opts.monthlyTotalIncome  ?? 0;
+  // const monthlyTotalExpense = opts.monthlyTotalExpense ?? 0;
+  // const monthlyBars         = buildMonthlyBars(monthlyData);
 
   // AI アドバイス
   const aiAdvice = opts.aiAdvice ?? '本日の収支データを集計しました。';
@@ -273,7 +273,7 @@ export function generateMoneyHTML(zaimResult, targetDate = new Date(), opts = {}
         </div>
       </div>
 
-      <!-- 📊 今月の累計 -->
+      <!-- TODO: 今月の累計（Zaim API 月次集計で実装予定）
       <div>
         <div class="flex items-center gap-3 mb-6 px-2">
           <h2 class="text-2xl font-black text-slate-800">📊 今月の累計</h2>
@@ -282,18 +282,19 @@ export function generateMoneyHTML(zaimResult, targetDate = new Date(), opts = {}
         <div class="grid grid-cols-2 gap-4 mb-6">
           <div class="bg-[#fef2f2] border border-[#fee2e2] rounded-[1.5rem] py-4 px-6 text-center">
             <div class="text-sm text-gray-500 mb-1">支出</div>
-            <div class="text-2xl font-black text-red-500">${fmtYen(monthlyTotalExpense)}</div>
+            <div class="text-2xl font-black text-red-500">monthlyTotalExpense</div>
           </div>
           <div class="bg-[#f0fdf4] border border-[#bbf7d0] rounded-[1.5rem] py-4 px-6 text-center">
             <div class="text-sm text-gray-500 mb-1">収入</div>
-            <div class="text-2xl font-black text-green-600">${fmtYen(monthlyTotalIncome)}</div>
+            <div class="text-2xl font-black text-green-600">monthlyTotalIncome</div>
           </div>
         </div>
 
         <div class="bg-slate-50 border border-slate-100 rounded-[1.5rem] p-6 space-y-4">
-          ${monthlyBars}
+          monthlyBars
         </div>
       </div>
+      -->
 
       <!-- 🤖 AI アドバイス -->
       <div>
