@@ -311,12 +311,6 @@ export function generateMoneyHTML(zaimResult, targetDate = new Date(), opts = {}
 
     </div>
 
-    <!-- フッター -->
-    <div class="bg-slate-50 py-8 text-center flex flex-col items-center gap-1 border-t border-slate-100">
-      <span class="text-xl text-slate-300">💴</span>
-      <span class="text-[10px] font-bold text-slate-400 tracking-[0.3em] uppercase">Zeny — Built for Takuma Chiba</span>
-    </div>
-
   </div>
 </body>
 </html>`;
