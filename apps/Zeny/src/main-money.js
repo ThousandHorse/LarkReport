@@ -114,8 +114,24 @@ async function runMoneyReport() {
     throw new Error(`Google Sheets からの支出予定の取得に失敗しました: ${err.message}`, { cause: err });
   }
 
-  // 4. HTML を生成
-  const html = generateMoneyHTML(zaimResult, targetDate, {
+  // 4. 給与日（毎月20日）以外は収入を非表示にする
+  // エンジニア収入の給与日は20日のため、それ以外の日は incomes を空にする
+  const jstDay = Number(new Intl.DateTimeFormat('en', { day: 'numeric', timeZone: 'Asia/Tokyo' }).format(targetDate));
+  const SALARY_DAY = 20;
+  const filteredResult = {
+    ...zaimResult,
+    incomes: jstDay === SALARY_DAY ? zaimResult.incomes : [],
+    summary: {
+      ...zaimResult.summary,
+      totalIncome: jstDay === SALARY_DAY ? zaimResult.summary.totalIncome : 0,
+      balance:     jstDay === SALARY_DAY
+        ? zaimResult.summary.balance
+        : zaimResult.summary.balance - zaimResult.summary.totalIncome,
+    },
+  };
+
+  // 5. HTML を生成
+  const html = generateMoneyHTML(filteredResult, targetDate, {
     futureExpenses,
     monthlyExpenses: [],
     monthlyTotalIncome: 0,
@@ -123,16 +139,16 @@ async function runMoneyReport() {
     aiAdvice,
   });
 
-  // 5. HTML → PNG に変換
+  // 6. HTML → PNG に変換
   const png = await htmlToPng(html);
 
-  // 6. JST 日付文字列を生成（例: 2026/05/06（水））
+  // 7. JST 日付文字列を生成（例: 2026/05/06（水））
   const date = new Intl.DateTimeFormat('ja-JP', {
     year: 'numeric', month: '2-digit', day: '2-digit', weekday: 'short',
     timeZone: 'Asia/Tokyo',
   }).format(targetDate).replace(/\((.+?)\)/, '（$1）');
 
-  // 7. Slack にボタン付きで送信
+  // 8. Slack にボタン付きで送信
   await sendReportWithButton(png, date);
 
   console.log('✅ 収支レポートを Slack に送信しました');
