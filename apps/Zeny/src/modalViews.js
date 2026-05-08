@@ -62,9 +62,8 @@ export function typeSelectView() {
         block_id: 'type_block',
         label: { type: 'plain_text', text: '種別を選択してください' },
         element: {
-          type: 'static_select',
+          type: 'radio_buttons',
           action_id: 'type',
-          placeholder: { type: 'plain_text', text: '選択してください' },
           options: [
             { text: { type: 'plain_text', text: '💸 支出' }, value: 'payment' },
             { text: { type: 'plain_text', text: '💰 収入' }, value: 'income'  },
