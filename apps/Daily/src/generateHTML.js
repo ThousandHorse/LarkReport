@@ -121,12 +121,6 @@ export function generateMorningHTML({ date, tasks, overdueTasks = [], completedC
 
     </div>
 
-    <!-- フッター -->
-    <div class="bg-slate-50 py-8 text-center flex flex-col items-center gap-1 border-t border-slate-100">
-      <span class="text-xl text-slate-300">🛡️</span>
-      <span class="text-[10px] font-bold text-slate-400 tracking-[0.3em] uppercase">Built for Takuma Chiba</span>
-    </div>
-
   </div>
 </body>
 </html>`;
@@ -273,12 +267,6 @@ export function generateEveningHTML({ date, completed = [], incomplete = [], ove
 
       </div>
 
-    </div>
-
-    <!-- フッター -->
-    <div class="bg-slate-900 py-8 text-center flex flex-col items-center gap-1">
-      <span class="text-xl text-indigo-400">🌙</span>
-      <span class="text-[10px] font-bold text-slate-500 tracking-[0.3em] uppercase">Built for Takuma Chiba</span>
     </div>
 
   </div>
