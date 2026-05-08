@@ -181,13 +181,13 @@ export function generateMoneyHTML(zaimResult, targetDate = new Date(), opts = {}
   <title>Zeny Money Report</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif; }
+    body { width: 390px; margin: 0; font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif; background: linear-gradient(to bottom right, #ecfdf5, #ccfbf1); }
   </style>
 </head>
 
-<body class="bg-gradient-to-br from-emerald-50 to-teal-100 p-10">
+<body>
 
-  <div class="w-[390px] mx-auto">
+  <div class="p-6">
 
     <!-- Header -->
     <div class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-center py-6 rounded-2xl shadow-md mb-6 text-xl font-bold">
