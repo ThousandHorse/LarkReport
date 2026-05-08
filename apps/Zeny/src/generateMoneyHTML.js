@@ -208,12 +208,13 @@ export function generateMoneyHTML(zaimResult, targetDate = new Date(), opts = {}
           <h2 class="text-2xl font-black text-slate-800">💴 今日の収支</h2>
         </div>
 
-        <!-- サマリー -->
-        <div class="grid grid-cols-3 gap-4 mb-6">
+        <!-- サマリー（収入は給与日のみ表示） -->
+        <div class="grid grid-cols-${incomes.length > 0 ? '3' : '2'} gap-4 mb-6">
+          ${incomes.length > 0 ? `
           <div class="bg-[#f0fdf4] border border-[#bbf7d0] rounded-[1.5rem] py-4 px-6 text-center">
             <div class="text-sm text-gray-500 mb-1">収入</div>
             <div class="text-2xl font-black text-green-600">${fmtYen(totalIncome)}</div>
-          </div>
+          </div>` : ''}
           <div class="bg-[#fef2f2] border border-[#fee2e2] rounded-[1.5rem] py-4 px-6 text-center">
             <div class="text-sm text-gray-500 mb-1">支出</div>
             <div class="text-2xl font-black text-red-500">${fmtYen(totalPayment)}</div>
@@ -224,7 +225,8 @@ export function generateMoneyHTML(zaimResult, targetDate = new Date(), opts = {}
           </div>
         </div>
 
-        <!-- 収入テーブル -->
+        <!-- 収入テーブル（給与日のみ表示） -->
+        ${incomes.length > 0 ? `
         <div class="bg-slate-50 border border-slate-100 rounded-[1.5rem] p-6 mb-4">
           <div class="font-black text-green-600 mb-3">📥 収入</div>
           <table class="w-full text-sm">
@@ -237,7 +239,7 @@ export function generateMoneyHTML(zaimResult, targetDate = new Date(), opts = {}
             </thead>
             <tbody>${incomeRows}</tbody>
           </table>
-        </div>
+        </div>` : ''}
 
         <!-- 支出テーブル -->
         <div class="bg-slate-50 border border-slate-100 rounded-[1.5rem] p-6">
