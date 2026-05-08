@@ -185,9 +185,9 @@ export function generateMoneyHTML(zaimResult, targetDate = new Date(), opts = {}
   </style>
 </head>
 
-<body class="bg-gradient-to-br from-emerald-50 to-teal-100 py-10">
+<body class="bg-gradient-to-br from-emerald-50 to-teal-100 p-10">
 
-  <div class="w-[800px] mx-auto">
+  <div class="w-[390px] mx-auto">
 
     <!-- Header -->
     <div class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-center py-6 rounded-2xl shadow-md mb-6 text-xl font-bold">
