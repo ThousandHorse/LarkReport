@@ -193,8 +193,11 @@ export function generateMoneyHTML(zaimResult, targetDate = new Date(), opts = {}
   <div class="bg-white overflow-hidden">
 
     <!-- ヘッダー -->
-    <div class="bg-gradient-to-r from-emerald-500 to-teal-600 p-10 text-white text-center">
-      <h1 class="text-4xl font-black">💴 ${dateLabel}</h1>
+    <div class="bg-gradient-to-r from-emerald-500 to-teal-600 p-10 text-white">
+      <div class="flex items-center gap-4">
+        <h1 class="text-4xl font-black">${dateLabel}</h1>
+        <span class="text-4xl">💴</span>
+      </div>
     </div>
 
     <div class="p-10 space-y-10">
