@@ -178,132 +178,140 @@ export function generateMoneyHTML(zaimResult, targetDate = new Date(), opts = {}
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Zeny Money Report</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif; }
+    body { width: 800px; min-height: 900px; margin: 0; font-family: 'Hiragino Sans', 'Noto Sans JP', sans-serif; background-color: #f0fdf4; }
   </style>
 </head>
 
-<body class="bg-gradient-to-br from-emerald-50 to-teal-100 p-10">
+<body>
+  <div class="bg-white overflow-hidden">
 
-  <div class="w-[390px] mx-auto">
-
-    <!-- Header -->
-    <div class="bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-center py-6 rounded-2xl shadow-md mb-6 text-xl font-bold">
-      ${dateLabel}
+    <!-- ヘッダー -->
+    <div class="bg-gradient-to-r from-emerald-500 to-teal-600 p-10 text-white text-center">
+      <h1 class="text-4xl font-black">💴 ${dateLabel}</h1>
     </div>
 
-    <!-- 💴 今日の収支 -->
-    <div class="mb-6">
+    <div class="p-10 space-y-10">
 
-      <div class="text-lg font-bold mb-3">💴 今日の収支</div>
-
-      <!-- サマリー -->
-      <div class="grid grid-cols-3 gap-4 mb-4">
-        <div class="bg-white rounded-2xl shadow-md p-4 text-center">
-          <div class="text-sm text-gray-500">収入</div>
-          <div class="text-xl font-bold text-green-600">${fmtYen(totalIncome)}</div>
+      <!-- 💴 今日の収支 -->
+      <div>
+        <div class="flex items-center gap-3 mb-6 px-2">
+          <h2 class="text-2xl font-black text-slate-800">💴 今日の収支</h2>
         </div>
-        <div class="bg-white rounded-2xl shadow-md p-4 text-center">
-          <div class="text-sm text-gray-500">支出</div>
-          <div class="text-xl font-bold text-red-500">${fmtYen(totalPayment)}</div>
+
+        <!-- サマリー -->
+        <div class="grid grid-cols-3 gap-4 mb-6">
+          <div class="bg-[#f0fdf4] border border-[#bbf7d0] rounded-[1.5rem] py-4 px-6 text-center">
+            <div class="text-sm text-gray-500 mb-1">収入</div>
+            <div class="text-2xl font-black text-green-600">${fmtYen(totalIncome)}</div>
+          </div>
+          <div class="bg-[#fef2f2] border border-[#fee2e2] rounded-[1.5rem] py-4 px-6 text-center">
+            <div class="text-sm text-gray-500 mb-1">支出</div>
+            <div class="text-2xl font-black text-red-500">${fmtYen(totalPayment)}</div>
+          </div>
+          <div class="bg-[#fffbeb] border border-[#fef3c7] rounded-[1.5rem] py-4 px-6 text-center">
+            <div class="text-sm text-gray-500 mb-1">差引</div>
+            <div class="text-2xl font-black ${balanceColor}">${fmtYen(balance)}</div>
+          </div>
         </div>
-        <div class="bg-white rounded-2xl shadow-md p-4 text-center">
-          <div class="text-sm text-gray-500">差引</div>
-          <div class="text-xl font-bold ${balanceColor}">${fmtYen(balance)}</div>
+
+        <!-- 収入テーブル -->
+        <div class="bg-slate-50 border border-slate-100 rounded-[1.5rem] p-6 mb-4">
+          <div class="font-black text-green-600 mb-3">📥 収入</div>
+          <table class="w-full text-sm">
+            <thead class="text-gray-500 border-b">
+              <tr>
+                <th class="text-left py-2">カテゴリ</th>
+                <th class="text-left py-2">支払い方法</th>
+                <th class="text-right py-2">金額</th>
+              </tr>
+            </thead>
+            <tbody>${incomeRows}</tbody>
+          </table>
         </div>
-      </div>
 
-      <!-- 収入テーブル -->
-      <div class="bg-white rounded-2xl shadow-md p-4 mb-4">
-        <div class="text-sm font-bold text-green-600 mb-2">📥 収入</div>
-        <table class="w-full text-sm">
-          <thead class="text-gray-500 border-b">
-            <tr>
-              <th class="text-left py-2">カテゴリ</th>
-              <th class="text-left py-2">支払い方法</th>
-              <th class="text-right py-2">金額</th>
-            </tr>
-          </thead>
-          <tbody>${incomeRows}</tbody>
-        </table>
-      </div>
-
-      <!-- 支出テーブル -->
-      <div class="bg-white rounded-2xl shadow-md p-4">
-        <div class="text-sm font-bold text-red-500 mb-2">📤 支出</div>
-        <table class="w-full text-sm">
-          <thead class="text-gray-500 border-b">
-            <tr>
-              <th class="text-left py-2">カテゴリ</th>
-              <th class="text-left py-2">支払い方法</th>
-              <th class="text-right py-2">金額</th>
-            </tr>
-          </thead>
-          <tbody>${expenseRows}</tbody>
-        </table>
-      </div>
-
-    </div>
-
-    <!-- 📅 今後の支出予定 -->
-    <div class="mb-6">
-
-      <div class="text-lg font-bold mb-3">📅 今後の支出予定</div>
-
-      <div class="bg-white rounded-2xl shadow-md p-4">
-        <table class="w-full text-sm mb-3">
-          <thead class="text-gray-500 border-b">
-            <tr>
-              <th class="text-left py-2">内容</th>
-              <th class="text-left py-2">予定時期</th>
-              <th class="text-right py-2">予定金額</th>
-            </tr>
-          </thead>
-          <tbody>${futureRows || '<tr><td colspan="3" class="py-3 text-center text-gray-400 text-xs">予定なし</td></tr>'}</tbody>
-        </table>
-        ${futureTotalLabel ? `<div class="text-right font-bold text-lg">${futureTotalLabel}</div>` : ''}
-      </div>
-
-    </div>
-
-    <!-- 📊 今月の累計 -->
-    <div class="mb-6">
-
-      <div class="text-lg font-bold mb-3">📊 今月の累計</div>
-
-      <div class="grid grid-cols-2 gap-4 mb-4">
-        <div class="bg-white rounded-2xl shadow-md p-4 text-center">
-          <div class="text-sm text-gray-500">支出</div>
-          <div class="text-xl font-bold text-red-500">${fmtYen(monthlyTotalExpense)}</div>
-        </div>
-        <div class="bg-white rounded-2xl shadow-md p-4 text-center">
-          <div class="text-sm text-gray-500">収入</div>
-          <div class="text-xl font-bold text-green-600">${fmtYen(monthlyTotalIncome)}</div>
+        <!-- 支出テーブル -->
+        <div class="bg-slate-50 border border-slate-100 rounded-[1.5rem] p-6">
+          <div class="font-black text-red-500 mb-3">📤 支出</div>
+          <table class="w-full text-sm">
+            <thead class="text-gray-500 border-b">
+              <tr>
+                <th class="text-left py-2">カテゴリ</th>
+                <th class="text-left py-2">支払い方法</th>
+                <th class="text-right py-2">金額</th>
+              </tr>
+            </thead>
+            <tbody>${expenseRows}</tbody>
+          </table>
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-md p-4 space-y-4">
-        ${monthlyBars}
+      <!-- 📅 今後の支出予定 -->
+      <div>
+        <div class="flex items-center gap-3 mb-6 px-2">
+          <h2 class="text-2xl font-black text-slate-800">📅 今後の支出予定</h2>
+        </div>
+
+        <div class="bg-slate-50 border border-slate-100 rounded-[1.5rem] p-6">
+          <table class="w-full text-sm mb-4">
+            <thead class="text-gray-500 border-b">
+              <tr>
+                <th class="text-left py-2">内容</th>
+                <th class="text-left py-2">予定時期</th>
+                <th class="text-right py-2">予定金額</th>
+              </tr>
+            </thead>
+            <tbody>${futureRows || '<tr><td colspan="3" class="py-3 text-center text-gray-400 text-xs">予定なし</td></tr>'}</tbody>
+          </table>
+          ${futureTotalLabel ? `<div class="text-right font-black text-lg text-slate-800">${futureTotalLabel}</div>` : ''}
+        </div>
       </div>
 
-    </div>
+      <!-- 📊 今月の累計 -->
+      <div>
+        <div class="flex items-center gap-3 mb-6 px-2">
+          <h2 class="text-2xl font-black text-slate-800">📊 今月の累計</h2>
+        </div>
 
-    <!-- 🤖 AI アドバイス -->
-    <div class="mb-6">
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div class="bg-[#fef2f2] border border-[#fee2e2] rounded-[1.5rem] py-4 px-6 text-center">
+            <div class="text-sm text-gray-500 mb-1">支出</div>
+            <div class="text-2xl font-black text-red-500">${fmtYen(monthlyTotalExpense)}</div>
+          </div>
+          <div class="bg-[#f0fdf4] border border-[#bbf7d0] rounded-[1.5rem] py-4 px-6 text-center">
+            <div class="text-sm text-gray-500 mb-1">収入</div>
+            <div class="text-2xl font-black text-green-600">${fmtYen(monthlyTotalIncome)}</div>
+          </div>
+        </div>
 
-      <div class="text-lg font-bold mb-3">🤖 AI からのアドバイス</div>
+        <div class="bg-slate-50 border border-slate-100 rounded-[1.5rem] p-6 space-y-4">
+          ${monthlyBars}
+        </div>
+      </div>
 
-      <div class="bg-emerald-50 rounded-2xl shadow-md p-5 flex gap-4 items-start">
-        <div class="text-3xl">🤖</div>
-        <div class="text-sm leading-relaxed text-gray-700">${aiAdvice}</div>
+      <!-- 🤖 AI アドバイス -->
+      <div>
+        <div class="flex items-center gap-3 mb-6 px-2">
+          <h2 class="text-2xl font-black text-slate-800">🤖 AI からのアドバイス</h2>
+        </div>
+
+        <div class="bg-emerald-50 border-l-[6px] border-emerald-500 p-8 rounded-r-[2rem] flex gap-6 items-start shadow-sm text-emerald-900">
+          <div class="bg-emerald-500 rounded-2xl p-3 text-white shadow-md flex-shrink-0">
+            <span class="text-2xl">🤖</span>
+          </div>
+          <div class="text-xl font-medium leading-relaxed">${aiAdvice}</div>
+        </div>
       </div>
 
     </div>
 
   </div>
-
 </body>
 </html>`;
 }

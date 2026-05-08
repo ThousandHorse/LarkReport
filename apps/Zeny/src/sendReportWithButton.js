@@ -38,11 +38,15 @@ export async function sendReportWithButton(imageBuffer, dateLabel, mention = '<!
     initial_comment: mention ? `${mention}\n💴 ${dateLabel} 収支レポートが届きました！` : `💴 ${dateLabel} 収支レポートが届きました！`,
   });
 
-  // 2. ボタンブロックを別メッセージで送信
+  // 2. メッセージ＋ボタンブロックを別メッセージで送信
   await client.chat.postMessage({
     channel: channelId,
-    text: '収支を入力する',
+    text: '本日の収支を入力しましょう！',
     blocks: [
+      {
+        type: 'section',
+        text: { type: 'mrkdwn', text: '本日の収支を入力しましょう！' },
+      },
       {
         type: 'actions',
         elements: [
