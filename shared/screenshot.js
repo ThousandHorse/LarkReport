@@ -37,6 +37,7 @@ export async function htmlToPng(html) {
       await page.setViewportSize({ width: 800, height: finalHeight });
     }
 
+    await browser.close();
     return await page.screenshot({ type: 'png' });
   } finally {
     await browser.close();
